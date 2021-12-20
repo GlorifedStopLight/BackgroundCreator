@@ -2,11 +2,12 @@ from mySimpleGui import *
 from random import *
 from math import *
 
-hi = 240
+
+hi = 248
 lo = 100
 c = [width//2, height//2]
 co = [hi, lo, lo]
-m = .3
+m = .05
 f = [400, 400]
 
 
@@ -72,30 +73,35 @@ class DotMaker:
 
 
 
-s = 9
+s = 4
 col = [lo, lo, hi]
 
-dotFactoryObj = DotMaker(5)
+dotFactoryObj = DotMaker(7)
+dotFactoryObj2 = DotMaker(4)
+
+
+showEvery = 300
 
 while True:
     tk.update()
+    for i in range(showEvery):
+        dotFactoryObj.dot(c, co)
+        dotFactoryObj2.dot(f, col)
 
-    dotFactoryObj.dot(c, co)
-    dotFactoryObj.dot(f, col)
+        co = rainbow(co)
+        #co = changeColorRandom(co)
 
-    co = rainbow(co)
-    #co = changeColorRandom(co)
+        col = rainbow(col)
+        v = choice((-s, 0, s))
+        w = choice((-s, 0, s))
+        if not not v:
+            c[0] = c[0] + v
+        else:
+            c[1] = c[1] + choice((-s, s))
 
-    col = rainbow(col)
-    v = choice((-s, 0, s))
-    w = choice((-s, 0, s))
-    if not not v:
-        c[0] = c[0] + v
-    else:
-        c[1] = c[1] + choice((-s, s))
+        if not not w:
+            f[0] = f[0] + v
+        else:
+            f[1] = f[1] + choice((-s, s))
 
-    if not not w:
-        f[0] = f[0] + v
-    else:
-        f[1] = f[1] + choice((-s, s))
 

@@ -14,7 +14,7 @@ def rgb_to_hex(rgb):
 
     return '#%02x%02x%02x' % rgb
 
-extraSpace = 4
+extraSpace = 3
 
 def drawRect(x, y, w, h, c):
     canvas.create_oval(x, y, x+w+extraSpace, y+h+extraSpace, fill=rgb_to_hex(c), outline='')

@@ -12,6 +12,7 @@ m = .3
 
 switch = True
 
+
 def blackAndWhite(c):
     global switch
     c = list(c)
@@ -83,6 +84,12 @@ def normal_round(n):
     return ceil(n)
 
 
+def changeCordsThread():
+
+    c[0] = abs(abs(c[0] + choice((-s, s)) - width) - width)
+    c[1] = abs(abs(c[1] + choice((-s, s)) - height) - height)
+
+
 class DotMaker:
 
     def __init__(self, splitReflections, isMirrored):
@@ -97,20 +104,33 @@ class DotMaker:
         self.splitReflections = splitReflections
         self.center = (width//2, height//2)
         self.isMirrored = isMirrored
+        self.drawThese = []
 
-    def dot(self, cords, c):
+    def getDotCreationInfo(self, cords, c):
         x = cords[0]
         y = cords[1]
 
+        self.drawThese = []
+
         for i in range(self.splitReflections):
-            drawRect(int(x), int(y), s, s, c)
+
+            self.drawThese.append((int(x), int(y), s, s, c))
             if self.isMirrored:
-                drawRect(int(abs(x-width)), int(y), s, s, c)
-                drawRect(int(x), int(abs(y-height)), s, s, c)
-                drawRect(int(abs(x-width)), int(abs(y-height)), s, s, c)
+                self.drawThese.append((int(abs(x-width)), int(y), s, s, c))
+                self.drawThese.append((int(x), int(abs(y-height)), s, s, c))
+                self.drawThese.append((int(abs(x-width)), int(abs(y-height)), s, s, c))
 
             x, y = ((x - self.center[0]) * self.cosine - (y - self.center[1]) * self.sine + self.center[0]),\
                    ((x - self.center[0]) * self.sine + (y - self.center[1]) * self.cosine + self.center[1])
+
+
+    def createDot(self):
+
+        # loop through all the given dots to draw
+        for dotInfo in self.drawThese:
+
+            # draw dot
+            drawRect(*dotInfo)
 
 
 # a class t
@@ -208,38 +228,54 @@ class ThreadWithReturnValue(Thread):
         return self._return
 
 
-s = 4
+
 col = [lo, lo, hi]
 
-dotFactoryObj = DotMaker(4, True)
+dotFactoryObj = DotMaker(3, False)
 
 
-showEvery = 2
+showEvery = 15
 
 compColors = ((22, 255, 236), (255, 193, 22), (255, 22, 146))
 handPickedBlues = ((105, 255, 172), (68, 206, 252), (107, 66, 255), (133, 188, 255), (5, 255, 238))
-biFlag = ((216, 9, 126), (140, 87, 156), (36, 70, 142), (140, 87, 156))
-transFlag = ((91, 206, 250), (245, 169, 184), (255, 255, 255), (245, 169, 184), (91, 206, 250), (245, 169, 184), (255, 255, 255))
-prideFlag = ((255, 0, 24), (255, 165, 44), (255, 255, 65), (0, 128, 24), (0, 0, 249), (134, 0, 125))
-lesbianFlag = ((214, 41, 0), (255, 155, 85), (255, 255, 255), (212, 97, 166), (165, 0, 98))
+bFlag = ((216, 9, 126), (140, 87, 156), (36, 70, 142), (140, 87, 156))
+tFlag = ((91, 206, 250), (245, 169, 184), (255, 255, 255), (245, 169, 184), (91, 206, 250), (245, 169, 184), (255, 255, 255))
+pFlag = ((255, 0, 24), (255, 165, 44), (255, 255, 65), (0, 128, 24), (0, 0, 249), (134, 0, 125))
+lFlag = ((214, 41, 0), (255, 155, 85), (255, 255, 255), (212, 97, 166), (165, 0, 98))
+mothersColor = ((0, 47, 255), (217, 41, 56))
 
-myColors = CustomColorFade(lesbianFlag, .3)
+myColors = CustomColorFade(bFlag, .2)
 
 getColorThread = ThreadWithReturnValue(target=myColors.getNextColor)
 getColorThread.start()
 co = getColorThread.join()
 
+doDotThread = ThreadWithReturnValue(target=dotFactoryObj.getDotCreationInfo, args=(c, co))
+doDotThread.start()
+doDotThread.join()
+
+
+cordsThread = ThreadWithReturnValue(target=changeCordsThread)
+cordsThread.start()
+cordsThread.join()
+
 while True:
     tk.update()
     for i in range(showEvery):
+
         getColorThread = ThreadWithReturnValue(target=myColors.getNextColor)
 
         getColorThread.start()
+
+        doDotThread = ThreadWithReturnValue(target=dotFactoryObj.getDotCreationInfo, args=(c, co))
+        doDotThread.start()
+
+        cordsThread = ThreadWithReturnValue(target=changeCordsThread)
+        cordsThread.start()
+
+        dotFactoryObj.createDot()
+
+        # join all threads
+        doDotThread.join()
         co = getColorThread.join()
-
-        dotFactoryObj.dot(c, co)
-
-        #co = myColors.getNextColor()
-
-        c[0] = abs(c[0] + choice((-s, s)) - width)
-        c[1] = abs(c[1] + choice((-s, s)) - height)
+        cordsThread.join()

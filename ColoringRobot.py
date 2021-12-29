@@ -116,9 +116,9 @@ class DotMaker:
 
             self.drawThese.append((int(x), int(y), s, s, c))
             if self.isMirrored:
-                self.drawThese.append((int(abs(x-width)), int(y), s, s, c))
-                self.drawThese.append((int(x), int(abs(y-height)), s, s, c))
-                self.drawThese.append((int(abs(x-width)), int(abs(y-height)), s, s, c))
+                self.drawThese.append((int(-x+width), int(y), s, s, c))
+                self.drawThese.append((int(x), int(-y+height), s, s, c))
+                self.drawThese.append((int(-x+width), int(-y+height), s, s, c))
 
             x, y = ((x - self.center[0]) * self.cosine - (y - self.center[1]) * self.sine + self.center[0]),\
                    ((x - self.center[0]) * self.sine + (y - self.center[1]) * self.cosine + self.center[1])
@@ -231,10 +231,10 @@ class ThreadWithReturnValue(Thread):
 
 col = [lo, lo, hi]
 
-dotFactoryObj = DotMaker(3, False)
+dotFactoryObj = DotMaker(3, True)
 
 
-showEvery = 15
+showEvery = 10
 
 compColors = ((22, 255, 236), (255, 193, 22), (255, 22, 146))
 handPickedBlues = ((105, 255, 172), (68, 206, 252), (107, 66, 255), (133, 188, 255), (5, 255, 238))

@@ -1,14 +1,14 @@
 from mySimpleGui import *
 from random import *
 from math import *
+from threading import Thread
 
 
 hi = 255
 lo = 0.1
 c = [width//2, height//2]
-co = [lo, lo, hi]
+#co = [lo, lo, hi]
 m = .3
-f = [400, 400]
 
 switch = True
 
@@ -86,7 +86,12 @@ def normal_round(n):
 class DotMaker:
 
     def __init__(self, splitReflections, isMirrored):
-        radianAmount = 2*pi / splitReflections / 4
+
+        if isMirrored:
+            radianAmount = 2*pi / splitReflections / 2
+        else:
+            radianAmount = 2 * pi / splitReflections
+
         self.cosine = cos(radianAmount)
         self.sine = sin(radianAmount)
         self.splitReflections = splitReflections
@@ -103,7 +108,8 @@ class DotMaker:
                 drawRect(int(abs(x-width)), int(y), s, s, c)
                 drawRect(int(x), int(abs(y-height)), s, s, c)
                 drawRect(int(abs(x-width)), int(abs(y-height)), s, s, c)
-            x, y = ((x - self.center[0]) * self.cosine - (y - self.center[1]) * self.sine + self.center[0]) ,\
+
+            x, y = ((x - self.center[0]) * self.cosine - (y - self.center[1]) * self.sine + self.center[0]),\
                    ((x - self.center[0]) * self.sine + (y - self.center[1]) * self.cosine + self.center[1])
 
 
@@ -187,23 +193,53 @@ class CustomColorFade:
         return self.currentColor
 
 
-s = 3
+class ThreadWithReturnValue(Thread):
+    def __init__(self, group=None, target=None, name=None,
+                 args=(), kwargs={}, Verbose=None):
+        Thread.__init__(self, group, target, name, args, kwargs)
+        self._return = None
+
+    def run(self):
+        if self._target is not None:
+            self._return = self._target(*self._args, **self._kwargs)
+
+    def join(self, *args):
+        Thread.join(self, *args)
+        return self._return
+
+
+s = 4
 col = [lo, lo, hi]
 
-dotFactoryObj = DotMaker(2, True)
+dotFactoryObj = DotMaker(4, True)
 
 
-showEvery = 10
+showEvery = 2
 
-myColors = CustomColorFade(((0, 0, 0), (255, 255, 255)), 1)
+compColors = ((22, 255, 236), (255, 193, 22), (255, 22, 146))
+handPickedBlues = ((105, 255, 172), (68, 206, 252), (107, 66, 255), (133, 188, 255), (5, 255, 238))
+biFlag = ((216, 9, 126), (140, 87, 156), (36, 70, 142), (140, 87, 156))
+transFlag = ((91, 206, 250), (245, 169, 184), (255, 255, 255), (245, 169, 184), (91, 206, 250), (245, 169, 184), (255, 255, 255))
+prideFlag = ((255, 0, 24), (255, 165, 44), (255, 255, 65), (0, 128, 24), (0, 0, 249), (134, 0, 125))
+lesbianFlag = ((214, 41, 0), (255, 155, 85), (255, 255, 255), (212, 97, 166), (165, 0, 98))
+
+myColors = CustomColorFade(lesbianFlag, .3)
+
+getColorThread = ThreadWithReturnValue(target=myColors.getNextColor)
+getColorThread.start()
+co = getColorThread.join()
 
 while True:
     tk.update()
     for i in range(showEvery):
+        getColorThread = ThreadWithReturnValue(target=myColors.getNextColor)
+
+        getColorThread.start()
+        co = getColorThread.join()
+
         dotFactoryObj.dot(c, co)
 
-        #co = rainbow(co)
-        co = myColors.getNextColor()
+        #co = myColors.getNextColor()
 
-        c[0] += choice((-s, s))
-        c[1] += choice((-s, s))
+        c[0] = abs(c[0] + choice((-s, s)) - width)
+        c[1] = abs(c[1] + choice((-s, s)) - height)

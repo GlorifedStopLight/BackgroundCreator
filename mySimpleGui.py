@@ -6,6 +6,7 @@ height = 768
 
 tk = Tk()
 canvas = Canvas(tk, width=width, height=height, bg="white")
+tk.attributes('-fullscreen', True)
 
 canvas.pack()
 

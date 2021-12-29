@@ -1,5 +1,6 @@
 from tkinter import *
 
+
 width = 1366
 height = 768
 
@@ -14,8 +15,7 @@ def rgb_to_hex(rgb):
 
     return '#%02x%02x%02x' % rgb
 
-extraSpace = 3
 
 def drawRect(x, y, w, h, c):
-    canvas.create_oval(x, y, x+w+extraSpace, y+h+extraSpace, fill=rgb_to_hex(c), outline='')
+    canvas.create_oval(x, y, x+w*2, y+h*2, fill=rgb_to_hex(c), outline='')
     canvas.pack()

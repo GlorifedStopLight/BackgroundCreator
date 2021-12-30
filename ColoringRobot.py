@@ -11,19 +11,6 @@ c = [width//2, height//2]
 m = .3
 
 
-userPickedSeed = input("input a seed leave blank for random seed: ")
-
-if userPickedSeed == "":
-    userPickedSeed = randint(0, 99999999)
-    print(userPickedSeed)
-else:
-    userPickedSeed = int(userPickedSeed)
-
-seed(userPickedSeed)
-
-switch = True
-
-
 def blackAndWhite(c):
     global switch
     c = list(c)

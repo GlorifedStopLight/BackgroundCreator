@@ -1,23 +1,25 @@
-from tkinter import *
+import tkinter as tk
 from random import *
 
 
 def testing(event):
+    global overlayOn, canvas
     print("pressed Escape")
 
-    # overlay is on
-    if overlayItems[0].pack:
+    if overlayOn:
 
-        # turn all the items in the overlay off
-        for item in overlayItems:
-            item.pack_forget()
+        canvas.pack_forget()
+        canvas2.pack()
+        overlayOn = False
+        print("forgot")
 
-    # overlay is off
     else:
 
-        # turn all the items in the overlay on
-        for item in overlayItems:
-            item.pack()
+        canvas.pack()
+        canvas2.pack_forget()
+        overlayOn = True
+
+    win.update()
 
 
 def rgb_to_hex(rgb):
@@ -59,10 +61,13 @@ else:
 
 seed(userPickedSeed)
 
+# 1366
 width = 1366
+
+# 768
 height = 768
 
-s = 5
+s = 4
 
 circleMatrix = []
 for i in range(width + 1):
@@ -73,15 +78,43 @@ for i in range(width + 1):
     circleMatrix.append(tempList.copy())
 
 
-tk = Tk()
-canvas = Canvas(tk, width=width, height=height, bg="white")
-tk.attributes('-fullscreen', True)
+win = tk.Tk()
 
-tk.bind("<Escape>", testing)
+# create and show the frame
+frame = tk.Frame(win, width=width, height=height)
+frame.pack(expand=True, fill=tk.BOTH) #.grid(row=0,column=0)
 
-overlayItems = []
+# create a canvas for the frame
+canvas = tk.Canvas(master=frame, bg='#FFFFFF', width=width, height=height, scrollregion=(0, 0, 500, 500))
+canvas2 = tk.Canvas(master=frame, bg='#000000')
+"""
+# create horizontal and vertical scroll bars
+hbar = tk.Scrollbar(frame, orient=tk.HORIZONTAL)
+vbar = tk.Scrollbar(frame, orient=tk.VERTICAL)
 
-overlayItems.append(Label(tk, text=str(userPickedSeed)))
+# show these scroll bars
+hbar.pack(side=tk.BOTTOM, fill=tk.X)
+vbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+# configure the scroll bars to move the canvas left right up and down
+hbar.config(command=canvas.xview)
+vbar.config(command=canvas.yview)
+
+# do the same to canvas
+canvas.config(width=width, height=height)
+canvas.config(xscrollcommand=hbar.set, yscrollcommand=vbar.set)
+
+# show canvas in frame
+canvas.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
+
+win.attributes('-fullscreen', True)
+"""
+win.bind("<Escape>", testing)
+canvas2.pack()
 canvas.pack()
 
+#lab = Label(canvas, text=str(userPickedSeed))
+#lab.pack()
+
+overlayOn = False
 

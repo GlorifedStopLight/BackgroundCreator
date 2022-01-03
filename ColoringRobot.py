@@ -2,6 +2,7 @@ from mySimpleGui import *
 from random import *
 from math import *
 from threading import Thread
+#from playsound import playsound
 
 
 hi = 255
@@ -230,10 +231,11 @@ col = [lo, lo, hi]
 dotFactoryObj = DotMaker(4, True)
 
 
-showEvery = 1000
+showEvery = 100
 
 compColors = ((22, 255, 236), (255, 193, 22), (255, 22, 146))
-handPickedBlues = ((105, 255, 172), (68, 206, 252), (107, 66, 255), (133, 188, 255), (5, 255, 238))
+handPickedBlues = ((105, 255, 172), (52, 206, 68), (107, 66, 255), (133, 188, 255), (5, 255, 238))
+
 bFlag = ((216, 9, 126), (140, 87, 156), (36, 70, 142), (140, 87, 156))
 tFlag = ((91, 206, 250), (245, 169, 184), (255, 255, 255), (245, 169, 184), (91, 206, 250), (245, 169, 184), (255, 255, 255))
 pFlag = ((255, 0, 24), (255, 165, 44), (255, 255, 65), (0, 128, 24), (0, 0, 249), (134, 0, 125))
@@ -242,8 +244,12 @@ mothersColor = ((0, 47, 255), (217, 41, 56))
 greens = ((32,178,170), (0,255,127), (85,107,47), (60,179,113), (107,142,35))
 sunflower = ((101, 67, 33), (255,255,0))
 redWhiteAndBlack = ((255, 0, 0), (0, 0, 0), (255, 0, 0), (255, 255, 255))
+caleb = ((80, 50, 0), (10, 255, 20), (0, 0, 0))
+dog = ((138, 97, 225), (0, 155, 255))
+ResshasNumbers = ((3, 198, 252), (247, 221, 17), (81, 10, 247))
 
-myColors = CustomColorFade(handPickedBlues, .2)
+
+myColors = CustomColorFade(ResshasNumbers, .09)
 
 getColorThread = ThreadWithReturnValue(target=myColors.getNextColor)
 getColorThread.start()
@@ -253,13 +259,12 @@ doDotThread = ThreadWithReturnValue(target=dotFactoryObj.getDotCreationInfo, arg
 doDotThread.start()
 doDotThread.join()
 
-
 cordsThread = ThreadWithReturnValue(target=changeCordsThread)
 cordsThread.start()
 cordsThread.join()
 
 while True:
-    tk.update()
+    win.update()
     for i in range(showEvery):
 
         getColorThread = ThreadWithReturnValue(target=myColors.getNextColor)

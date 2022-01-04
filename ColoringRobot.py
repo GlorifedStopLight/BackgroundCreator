@@ -2,7 +2,9 @@ import tkinter as tk
 from random import *
 from math import *
 from threading import Thread
-#from playsound import playsound
+from tkinter import colorchooser
+
+# from playsound import playsound
 
 
 def testing(event):
@@ -13,19 +15,18 @@ def testing(event):
 
         frame.pack_forget()
         overlayFrame.pack()
-        #testTextBox.pack()
+        #dotsDrawnCount.insert('end', str(totalDotIterationCount))
+        #dotsDrawnCount.pack()
+
         overlayOn = False
         print("forgot")
 
     else:
 
         frame.pack()
-        #testTextBox.pack_forget()
         overlayFrame.pack_forget()
 
         overlayOn = True
-
-
 
 
 def rgb_to_hex(rgb):
@@ -95,11 +96,16 @@ canvas = tk.Canvas(master=frame, bg='#FFFFFF', width=width, height=height, scrol
 overlayFrame = tk.Frame(master=win, bg='#000000', width=width, height=height)
 overlayFrame.pack()
 
-testTextBox = tk.Text(master=overlayFrame, height=1, width=10, bg="#FF00FF")
-testTextBox.pack()
-
-seedDisplayer = tk.Label(master=overlayFrame, text=str(userPickedSeed))
+# text
+seedDisplayer = tk.Text(master=overlayFrame)
+seedDisplayer.config(font=("Helvetica", 36))
 seedDisplayer.pack()
+seedDisplayer.insert("end", str(userPickedSeed))
+
+#
+dotsDrawnCount = tk.Button(master=overlayFrame, text="sup dawg", bg="#0000FF")
+dotsDrawnCount.config(font=("Helvetica", 36))
+dotsDrawnCount.pack()
 
 overlayFrame.pack_forget()
 canvas.pack()
@@ -137,8 +143,6 @@ win.bind("<Escape>", testing)
 #lab.pack()
 
 overlayOn = True
-
-
 
 hi = 255
 lo = 0.1
@@ -366,7 +370,7 @@ col = [lo, lo, hi]
 dotFactoryObj = DotMaker(4, True)
 
 
-showEvery = 100
+showEvery = 30000
 
 compColors = ((22, 255, 236), (255, 193, 22), (255, 22, 146))
 handPickedBlues = ((105, 255, 172), (52, 206, 68), (107, 66, 255), (133, 188, 255), (5, 255, 238))
@@ -376,15 +380,19 @@ tFlag = ((91, 206, 250), (245, 169, 184), (255, 255, 255), (245, 169, 184), (91,
 pFlag = ((255, 0, 24), (255, 165, 44), (255, 255, 65), (0, 128, 24), (0, 0, 249), (134, 0, 125))
 lFlag = ((214, 41, 0), (255, 155, 85), (255, 255, 255), (212, 97, 166), (165, 0, 98))
 mothersColor = ((0, 47, 255), (217, 41, 56))
-greens = ((32,178,170), (0,255,127), (85,107,47), (60,179,113), (107,142,35))
-sunflower = ((101, 67, 33), (255,255,0))
+greens = ((32, 178, 170), (0, 255, 127), (85, 107, 47), (60, 179, 113), (107, 142, 35))
+sunflower = ((101, 67, 33), (255, 255, 0))
 redWhiteAndBlack = ((255, 0, 0), (0, 0, 0), (255, 0, 0), (255, 255, 255))
 caleb = ((80, 50, 0), (10, 255, 20), (0, 0, 0))
 dog = ((138, 97, 225), (0, 155, 255))
 ResshasNumbers = ((3, 198, 252), (247, 221, 17), (81, 10, 247))
+helenNumebrs = ((61, 128, 81), (128, 201, 232), (133, 36, 9))
 
+x = .66666
 
-myColors = CustomColorFade(ResshasNumbers, .09)
+totalDotIterationCount = 0
+
+myColors = CustomColorFade(bFlag, .07)
 
 getColorThread = ThreadWithReturnValue(target=myColors.getNextColor)
 getColorThread.start()
@@ -420,3 +428,5 @@ while True:
             doDotThread.join()
             co = getColorThread.join()
             cordsThread.join()
+
+        totalDotIterationCount += showEvery

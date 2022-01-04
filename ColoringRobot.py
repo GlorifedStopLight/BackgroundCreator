@@ -11,15 +11,18 @@ def testing(event):
 
     if overlayOn:
 
-        canvas.pack_forget()
-        canvas2.pack()
+        frame.pack_forget()
+        overlayFrame.pack()
+        #testTextBox.pack()
         overlayOn = False
         print("forgot")
 
     else:
 
-        canvas.pack()
-        canvas2.pack_forget()
+        frame.pack()
+        #testTextBox.pack_forget()
+        overlayFrame.pack_forget()
+
         overlayOn = True
 
 
@@ -85,11 +88,19 @@ win = tk.Tk()
 
 # create and show the frame
 frame = tk.Frame(win, width=width, height=height)
-frame.pack(expand=True, fill=tk.BOTH) #.grid(row=0,column=0)
+frame.pack(expand=True, fill=tk.BOTH)
 
 # create a canvas for the frame
 canvas = tk.Canvas(master=frame, bg='#FFFFFF', width=width, height=height, scrollregion=(0, 0, 500, 500))
-canvas2 = tk.Canvas(master=frame, bg='#000000')
+overlayFrame = tk.Frame(master=win, bg='#000000', width=width, height=height)
+overlayFrame.pack()
+
+testTextBox = tk.Text(master=overlayFrame, height=1, width=10, bg="#FF00FF")
+testTextBox.pack()
+
+overlayFrame.pack_forget()
+canvas.pack()
+
 """
 # create horizontal and vertical scroll bars
 hbar = tk.Scrollbar(frame, orient=tk.HORIZONTAL)
@@ -113,9 +124,11 @@ canvas.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
 win.attributes('-fullscreen', True)
 """
 win.bind("<Escape>", testing)
-canvas2.pack()
-canvas2.pack_forget()
-canvas.pack()
+
+
+#testTextBox.pack_forget()
+
+
 
 #lab = Label(canvas, text=str(userPickedSeed))
 #lab.pack()

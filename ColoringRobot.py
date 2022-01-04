@@ -98,6 +98,9 @@ overlayFrame.pack()
 testTextBox = tk.Text(master=overlayFrame, height=1, width=10, bg="#FF00FF")
 testTextBox.pack()
 
+seedDisplayer = tk.Label(master=overlayFrame, text=str(userPickedSeed))
+seedDisplayer.pack()
+
 overlayFrame.pack_forget()
 canvas.pack()
 

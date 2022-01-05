@@ -1,5 +1,7 @@
 import tkinter as tk
 import json
+from tkinter.colorchooser import askcolor
+from threading import Thread
 
 
 myExampleObject = {
@@ -58,6 +60,9 @@ myExampleObject = {
 
 def saveUserInput():
 
+    if seedNameInput == "" or seedCodeInput == "":
+        return
+
     with open("mySavedData.json") as outfile:
 
         # load all of the current presets
@@ -74,8 +79,24 @@ def saveUserInput():
         outfile.write(json_object)
 
 
+def addColor():
+    myColors.append(askcolor(title="Tkinter Color Chooser")[1])
+    listbox.insert("end", "   ")
+    listbox.itemconfig("end", {"bg": myColors[-1]})
+
+
+def removeSelectedColor():
+    pass
+
+
+myColorButtons = []
+myColors = []
+
 win = tk.Tk()
 overlayFrame = tk.Frame(master=win).grid(row=0, column=0)
+
+listbox = tk.Listbox(master=win)
+listbox.grid(row=0, column=3)
 
 # gets the desired seed to save
 seedCodeInput = tk.Entry(master=overlayFrame, width=50)
@@ -95,5 +116,14 @@ seedNameInputLabel.grid(row=3, column=0)
 
 saveSeedButton = tk.Button(master=overlayFrame, text="Save Seed", command=saveUserInput)
 saveSeedButton.grid(row=0, column=0)
+
+# add color
+wantColor = tk.Button(master=overlayFrame, text="choose color", command=addColor)
+wantColor.grid(row=0, column=1)
+
+# 'list' of chosen colors
+chosenColorTab = tk.Canvas(master=overlayFrame)
+chosenColorTab.grid(row=0, column=30)
+
 
 win.mainloop()

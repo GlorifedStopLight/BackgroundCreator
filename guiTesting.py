@@ -58,6 +58,34 @@ myExampleObject = {
 }
 
 
+class DragDropListbox(tk.Listbox):
+    """ A Tkinter listbox with drag'n'drop reordering of entries. """
+    def __init__(self, master, **kw):
+        kw['selectmode'] = tk.SINGLE
+        tk.Listbox.__init__(self, master, kw)
+        self.bind('<Button-1>', self.setCurrent)
+        self.bind('<B1-Motion>', self.shiftSelection)
+        self.curIndex = None
+
+    def setCurrent(self, event):
+        self.curIndex = self.nearest(event.y)
+
+    def shiftSelection(self, event):
+        i = self.nearest(event.y)
+        if i < self.curIndex:
+            x = self.get(i)
+            self.delete(i)
+            self.insert(i+1, x)
+            self.itemconfig(i+1, {"bg": x, "selectbackground": x})
+            self.curIndex = i
+        elif i > self.curIndex:
+            x = self.get(i)
+            self.delete(i)
+            self.insert(i-1, x)
+            self.itemconfig(i - 1, {"bg": x, "selectbackground": x})
+            self.curIndex = i
+
+
 def saveUserInput():
 
     if seedNameInput == "" or seedCodeInput == "":
@@ -81,12 +109,13 @@ def saveUserInput():
 
 def addColor():
     myColors.append(askcolor(title="Tkinter Color Chooser")[1])
-    listbox.insert("end", "   ")
-    listbox.itemconfig("end", {"bg": myColors[-1]})
+    listbox.insert("end", myColors[-1])
+    listbox.itemconfig("end", {"bg": myColors[-1], "selectbackground": myColors[-1]})
 
 
 def removeSelectedColor():
-    pass
+    #listbox.get(listbox.curselection())
+    listbox.delete(listbox.curselection())
 
 
 myColorButtons = []
@@ -95,8 +124,10 @@ myColors = []
 win = tk.Tk()
 overlayFrame = tk.Frame(master=win).grid(row=0, column=0)
 
-listbox = tk.Listbox(master=win)
+# list of colors
+listbox = DragDropListbox(master=win)
 listbox.grid(row=0, column=3)
+listbox.config(selectborderwidth=5, relief=tk.SUNKEN, exportselection=False, activestyle=tk.UNDERLINE)
 
 # gets the desired seed to save
 seedCodeInput = tk.Entry(master=overlayFrame, width=50)
@@ -119,11 +150,14 @@ saveSeedButton.grid(row=0, column=0)
 
 # add color
 wantColor = tk.Button(master=overlayFrame, text="choose color", command=addColor)
-wantColor.grid(row=0, column=1)
+wantColor.grid(row=1, column=2)
 
 # 'list' of chosen colors
 chosenColorTab = tk.Canvas(master=overlayFrame)
 chosenColorTab.grid(row=0, column=30)
 
+# button to remove color
+removeColorButton = tk.Button(master=overlayFrame, text="Remove Selected Color", command=removeSelectedColor)
+removeColorButton.grid(row=1, column=3)
 
 win.mainloop()

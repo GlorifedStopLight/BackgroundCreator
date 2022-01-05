@@ -86,9 +86,15 @@ class DragDropListbox(tk.Listbox):
             self.curIndex = i
 
 
+def hex_to_rgb(value):
+    value = value.lstrip('#')
+    lv = len(value)
+    return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+
+
 def saveUserInput():
 
-    if seedNameInput == "" or seedCodeInput == "":
+    if seedNameInput.get() == "" or seedCodeInput.get() == "":
         return
 
     with open("mySavedData.json") as outfile:
@@ -114,8 +120,38 @@ def addColor():
 
 
 def removeSelectedColor():
-    #listbox.get(listbox.curselection())
     listbox.delete(listbox.curselection())
+
+
+def saveColorPreset():
+    if entry_colorPresetName.get() == "":
+        print("no given name for preset")
+        return
+
+    with open("mySavedData.json") as outfile:
+
+        # load all of the current presets
+        info = json.load(outfile)
+
+        # initialize the list for colors
+        presetColors = []
+
+        # loop through each line in listbox
+        for i in range(listbox.size()):
+
+            # add the name to the list (the name is a color)
+            presetColors.append(hex_to_rgb(listbox.get(i)))
+
+        # create a new color preset
+        info["savedColors"][entry_colorPresetName.get()] = presetColors
+
+        # create a json object
+        json_object = json.dumps(info, indent=4)
+
+    # Writing to sample.json
+    with open("mySavedData.json", "w") as outfile:
+
+        outfile.write(json_object)
 
 
 myColorButtons = []
@@ -150,14 +186,18 @@ saveSeedButton.grid(row=0, column=0)
 
 # add color
 wantColor = tk.Button(master=overlayFrame, text="choose color", command=addColor)
-wantColor.grid(row=1, column=2)
-
-# 'list' of chosen colors
-chosenColorTab = tk.Canvas(master=overlayFrame)
-chosenColorTab.grid(row=0, column=30)
+wantColor.grid(row=2, column=2)
 
 # button to remove color
 removeColorButton = tk.Button(master=overlayFrame, text="Remove Selected Color", command=removeSelectedColor)
-removeColorButton.grid(row=1, column=3)
+removeColorButton.grid(row=2, column=3)
+
+# gets the name for the seed
+entry_colorPresetName = tk.Entry(master=overlayFrame, width=50)
+entry_colorPresetName.grid(row=3, column=3)
+
+# save the colors you've chosen in a json file
+butt_saveColorPreset = tk.Button(master=overlayFrame, text="save color preset", command=saveColorPreset)
+butt_saveColorPreset.grid(row=3, column=4)
 
 win.mainloop()

@@ -1,6 +1,148 @@
 {
-    "name": "sathiyajith",
-    "rollno": 56,
-    "cgpa": 8.6,
-    "phonenumber": "9976770500"
+    "fullPresets": {
+        "that fun spiral one": {
+            "all dot Info": [
+                {
+                    "color change speed": 0.5,
+                    "color scheme": [
+                        [
+                            0,
+                            0,
+                            0
+                        ],
+                        [
+                            255,
+                            255,
+                            255
+                        ],
+                        [
+                            0,
+                            255,
+                            0
+                        ]
+                    ],
+                    "number of branches": 2,
+                    "isMirrored": true
+                },
+                {
+                    "color change speed": 45,
+                    "color scheme": [
+                        [
+                            255,
+                            255,
+                            255
+                        ],
+                        [
+                            0,
+                            255,
+                            0
+                        ]
+                    ],
+                    "number of branches": 9,
+                    "isMirrored": false
+                }
+            ],
+            "number of dots made at time of save": 8239,
+            "show screen every": 50,
+            "seed": 913042
+        },
+        "I really like tits": {
+            "all dot Info": [
+                {
+                    "color change speed": 0.5,
+                    "color scheme": [
+                        [
+                            0,
+                            0,
+                            0
+                        ],
+                        [
+                            255,
+                            255,
+                            255
+                        ],
+                        [
+                            0,
+                            255,
+                            0
+                        ]
+                    ],
+                    "number of branches": 2,
+                    "isMirrored": true
+                },
+                {
+                    "color change speed": 45,
+                    "color scheme": [
+                        [
+                            255,
+                            255,
+                            255
+                        ],
+                        [
+                            0,
+                            255,
+                            0
+                        ]
+                    ],
+                    "number of branches": 9,
+                    "isMirrored": false
+                }
+            ],
+            "number of dots made at time of save": 8239,
+            "show screen every": 50,
+            "seed": 12
+        }
+    },
+    "savedColors": {
+        "blues and purples": [
+            [
+                0,
+                0,
+                255
+            ],
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                23,
+                203,
+                234
+            ]
+        ],
+        "lesbian Flag": [
+            [
+                214,
+                41,
+                0
+            ],
+            [
+                255,
+                155,
+                85
+            ],
+            [
+                255,
+                255,
+                255
+            ],
+            [
+                212,
+                97,
+                166
+            ],
+            [
+                165,
+                0,
+                98
+            ]
+        ]
+    },
+    "savedSeeds": {
+        "little man person": 12,
+        "idk I haven't tried this one": 3982384928,
+        "newSeedName": "67667676",
+        "man person guy w/ evelyn": "898979797"
+    }
 }

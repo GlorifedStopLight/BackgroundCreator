@@ -2,31 +2,31 @@ import tkinter as tk
 from random import *
 from math import *
 from threading import Thread
+
 from tkinter import colorchooser
 
 # from playsound import playsound
 
 
 def testing(event):
-    global overlayOn, canvas
-    print("pressed Escape")
+    global overlayOff, canvas
 
-    if overlayOn:
+    if overlayOff:
 
         frame.pack_forget()
         overlayFrame.pack()
         #dotsDrawnCount.insert('end', str(totalDotIterationCount))
         #dotsDrawnCount.pack()
 
-        overlayOn = False
-        print("forgot")
+        overlayOff = False
 
     else:
 
         frame.pack()
         overlayFrame.pack_forget()
 
-        overlayOn = True
+        overlayOff = True
+    win.update()
 
 
 def rgb_to_hex(rgb):
@@ -37,15 +37,13 @@ def rgb_to_hex(rgb):
 
 def drawRect(x, y, w, h, c):
 
-    if 0 <= x <= width and 0 <= y <= height:
+    if 0 <= y <= height and 0 <= x <= width:
 
         # spot is empty
         if circleMatrix[x][y] is None:
 
             # add new circle to our matrix
             circleMatrix[x][y] = canvas.create_oval(x-w, y-h, x+w, y+h, fill=rgb_to_hex(c), outline='')
-
-            canvas.pack()
 
         # trying to put a circle over an old circle
         else:
@@ -55,7 +53,6 @@ def drawRect(x, y, w, h, c):
 
             # add new circle to our matrix
             circleMatrix[x][y] = canvas.create_oval(x - w, y - h, x + w, y + h, fill=rgb_to_hex(c), outline='')
-            canvas.pack()
 
 
 userPickedSeed = input("input a seed leave blank for random seed: ")
@@ -74,7 +71,7 @@ width = 1366
 # 768
 height = 768
 
-s = 4
+s = 5
 
 circleMatrix = []
 for i in range(width + 1):
@@ -110,7 +107,7 @@ dotsDrawnCount.pack()
 overlayFrame.pack_forget()
 canvas.pack()
 
-"""
+
 # create horizontal and vertical scroll bars
 hbar = tk.Scrollbar(frame, orient=tk.HORIZONTAL)
 vbar = tk.Scrollbar(frame, orient=tk.VERTICAL)
@@ -130,26 +127,14 @@ canvas.config(xscrollcommand=hbar.set, yscrollcommand=vbar.set)
 # show canvas in frame
 canvas.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
 
-win.attributes('-fullscreen', True)
-"""
-win.bind("<Escape>", testing)
 
+win.bind("<Escape>", testing)
+win.attributes('-fullscreen', True)
 
 #testTextBox.pack_forget()
 
-
-
 #lab = Label(canvas, text=str(userPickedSeed))
 #lab.pack()
-
-overlayOn = True
-
-hi = 255
-lo = 0.1
-c = [width//2, height//2]
-#co = [lo, lo, hi]
-m = .3
-
 
 def blackAndWhite(c):
     global switch
@@ -222,15 +207,9 @@ def normal_round(n):
     return ceil(n)
 
 
-def changeCordsThread():
-
-    c[0] = abs(abs(c[0] + choice((-s, s)) - width) - width)
-    c[1] = abs(abs(c[1] + choice((-s, s)) - height) - height)
-
-
 class DotMaker:
 
-    def __init__(self, splitReflections, isMirrored):
+    def __init__(self, splitReflections, isMirrored, followThisDot=None, startLocation=None):
 
         if isMirrored:
             radianAmount = 2*pi / splitReflections / 2
@@ -243,20 +222,26 @@ class DotMaker:
         self.center = (width//2, height//2)
         self.isMirrored = isMirrored
         self.drawThese = []
+        self.followThisDot = followThisDot
 
-    def getDotCreationInfo(self, cords, c):
-        x = cords[0]
-        y = cords[1]
+        if startLocation is None:
+            self.cords = [width//2, height//2]
+        else:
+            self.cords = startLocation
+
+    def getDotCreationInfo(self, currentColor):
+        x = self.cords[0]
+        y = self.cords[1]
 
         self.drawThese = []
 
         for i in range(self.splitReflections):
 
-            self.drawThese.append((int(x), int(y), s, s, c))
+            self.drawThese.append((int(x), int(y), s, s, currentColor))
             if self.isMirrored:
-                self.drawThese.append((int(-x+width), int(y), s, s, c))
-                self.drawThese.append((int(x), int(-y+height), s, s, c))
-                self.drawThese.append((int(-x+width), int(-y+height), s, s, c))
+                self.drawThese.append((int(-x+width), int(y), s, s, currentColor))
+                self.drawThese.append((int(x), int(-y+height), s, s, currentColor))
+                self.drawThese.append((int(-x+width), int(-y+height), s, s, currentColor))
 
             x, y = ((x - self.center[0]) * self.cosine - (y - self.center[1]) * self.sine + self.center[0]),\
                    ((x - self.center[0]) * self.sine + (y - self.center[1]) * self.cosine + self.center[1])
@@ -268,6 +253,11 @@ class DotMaker:
 
             # draw dot
             drawRect(*dotInfo)
+
+    def changeCordsThread(self):
+
+        self.cords[0] = abs(abs(self.cords[0] + choice((-s, s)) - width) - width)
+        self.cords[1] = abs(abs(self.cords[1] + choice((-s, s)) - height) - height)
 
 
 # a class t
@@ -365,12 +355,54 @@ class ThreadWithReturnValue(Thread):
         return self._return
 
 
+class ControlAll:
+    def __init__(self, colorSelection, colorSpeed, branchNumber, isBranchesMirrored, startLocation=None):
+        self.dotFactoryObj = DotMaker(branchNumber, isBranchesMirrored, startLocation=startLocation)
+
+        self.myColors = CustomColorFade(colorSelection, colorSpeed)
+        self.getColorThread = ThreadWithReturnValue(target=self.myColors.getNextColor)
+        self.getColorThread.start()
+        self.dotColor = self.getColorThread.join()
+
+        doDotThread = ThreadWithReturnValue(target=self.dotFactoryObj.getDotCreationInfo, args=(self.dotColor,))
+        doDotThread.start()
+        doDotThread.join()
+
+        cordsThread = ThreadWithReturnValue(target=self.dotFactoryObj.changeCordsThread)
+        cordsThread.start()
+        cordsThread.join()
+
+    def updateAllThings(self):
+
+        getColorThread = ThreadWithReturnValue(target=self.myColors.getNextColor)
+
+        getColorThread.start()
+
+        doDotThread = ThreadWithReturnValue(target=self.dotFactoryObj.getDotCreationInfo, args=(self.dotColor,))
+        doDotThread.start()
+
+        cordsThread = ThreadWithReturnValue(target=self.dotFactoryObj.changeCordsThread)
+        cordsThread.start()
+
+        self.dotFactoryObj.createDot()
+
+        # join all threads
+        doDotThread.join()
+        self.dotColor = getColorThread.join()
+        cordsThread.join()
+
+
+overlayOff = False
+
+hi = 255
+lo = 0.1
+c = [width//2, height//2]
+#co = [lo, lo, hi]
 col = [lo, lo, hi]
 
-dotFactoryObj = DotMaker(4, True)
+m = .3
 
-
-showEvery = 30000
+showEvery = 100
 
 compColors = ((22, 255, 236), (255, 193, 22), (255, 22, 146))
 handPickedBlues = ((105, 255, 172), (52, 206, 68), (107, 66, 255), (133, 188, 255), (5, 255, 238))
@@ -388,45 +420,19 @@ dog = ((138, 97, 225), (0, 155, 255))
 ResshasNumbers = ((3, 198, 252), (247, 221, 17), (81, 10, 247))
 helenNumebrs = ((61, 128, 81), (128, 201, 232), (133, 36, 9))
 
-x = .66666
-
 totalDotIterationCount = 0
 
-myColors = CustomColorFade(bFlag, .07)
-
-getColorThread = ThreadWithReturnValue(target=myColors.getNextColor)
-getColorThread.start()
-co = getColorThread.join()
-
-doDotThread = ThreadWithReturnValue(target=dotFactoryObj.getDotCreationInfo, args=(c, co))
-doDotThread.start()
-doDotThread.join()
-
-cordsThread = ThreadWithReturnValue(target=changeCordsThread)
-cordsThread.start()
-cordsThread.join()
+myControl = ControlAll(lFlag, .07, 3, True)
+myControl2 = ControlAll(lFlag, .1, 1, True, [0, 0])
 
 while True:
     win.update()
-    if overlayOn:
+
+    if overlayOff:
 
         for i in range(showEvery):
 
-            getColorThread = ThreadWithReturnValue(target=myColors.getNextColor)
-
-            getColorThread.start()
-
-            doDotThread = ThreadWithReturnValue(target=dotFactoryObj.getDotCreationInfo, args=(c, co))
-            doDotThread.start()
-
-            cordsThread = ThreadWithReturnValue(target=changeCordsThread)
-            cordsThread.start()
-
-            dotFactoryObj.createDot()
-
-            # join all threads
-            doDotThread.join()
-            co = getColorThread.join()
-            cordsThread.join()
+            myControl.updateAllThings()
+            myControl2.updateAllThings()
 
         totalDotIterationCount += showEvery

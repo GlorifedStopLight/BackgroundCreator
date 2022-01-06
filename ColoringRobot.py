@@ -475,6 +475,13 @@ def drawRect(x, y, w, h, c):
             circleMatrix[x][y] = canvas.create_oval(x - w, y - h, x + w, y + h, fill=rgb_to_hex(c), outline='')
 
 
+def deleteColorPreset():
+    x = messagebox.askquestion("Warning", "are you sure you would like \n to delete this color preset?")
+    if x == "yes":
+        print("do it bitch")
+    else:
+        print("jk never do it bestie")
+
 #
 class myApp:
     def __init__(self):
@@ -564,6 +571,10 @@ entry_colorPresetName.grid(row=3, column=3)
 # save the colors you've chosen in a json file
 butt_saveColorPreset = tk.Button(master=overlayFrame, text="save color preset", command=saveColorPreset)
 butt_saveColorPreset.grid(row=4, column=0)
+
+# button to delete the selected color preset
+butt_deleteColorPreset = tk.Button(master=overlayFrame, text="delete color preset", command=deleteColorPreset)
+butt_deleteColorPreset.grid(row=5, column=0)
 
 # datatype of menu text
 clicked = tk.StringVar()

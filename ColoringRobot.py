@@ -4,6 +4,7 @@ from math import *
 from threading import Thread
 import json
 from tkinter.colorchooser import askcolor
+import time
 
 from tkinter import colorchooser
 
@@ -129,7 +130,6 @@ class DotMaker:
             drawRect(*dotInfo)
 
     def changeCordsThread(self):
-
         self.cords[0] = abs(abs(self.cords[0] + choice((-s, s)) - width) - width)
         self.cords[1] = abs(abs(self.cords[1] + choice((-s, s)) - height) - height)
 
@@ -238,14 +238,6 @@ class ControlAll:
         self.getColorThread.start()
         self.dotColor = self.getColorThread.join()
 
-        doDotThread = ThreadWithReturnValue(target=self.dotFactoryObj.getDotCreationInfo, args=(self.dotColor,))
-        doDotThread.start()
-        doDotThread.join()
-
-        cordsThread = ThreadWithReturnValue(target=self.dotFactoryObj.changeCordsThread)
-        cordsThread.start()
-        cordsThread.join()
-
     def updateAllThings(self):
 
         getColorThread = ThreadWithReturnValue(target=self.myColors.getNextColor)
@@ -258,12 +250,12 @@ class ControlAll:
         cordsThread = ThreadWithReturnValue(target=self.dotFactoryObj.changeCordsThread)
         cordsThread.start()
 
-        self.dotFactoryObj.createDot()
-
         # join all threads
         doDotThread.join()
         self.dotColor = getColorThread.join()
         cordsThread.join()
+
+        self.dotFactoryObj.createDot()  # 0.056 - 0.01 seconds
 
 
 class DragDropListbox(tk.Listbox):

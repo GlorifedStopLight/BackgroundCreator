@@ -92,6 +92,12 @@ def hex_to_rgb(value):
     return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
 
+def rgb_to_hex(rgb):
+    rgb = rgb[0], rgb[1], rgb[2]
+
+    return '#%02x%02x%02x' % rgb
+
+
 def saveUserInput():
 
     if seedNameInput.get() == "" or seedCodeInput.get() == "":
@@ -124,6 +130,8 @@ def removeSelectedColor():
 
 
 def saveColorPreset():
+    global drop_colorPresets
+
     if entry_colorPresetName.get() == "":
         print("no given name for preset")
         return
@@ -153,6 +161,58 @@ def saveColorPreset():
 
         outfile.write(json_object)
 
+    menu = drop_colorPresets["menu"]
+    menu.delete(0, "end")
+    for string in getColorPresetNames():
+        menu.add_command(label=string,
+                         command=lambda value=string: clicked.set(value))
+
+
+# returns a list of strings which are the names of saved color presets
+def getColorPresetNames():
+
+    # open json file (contains saved information)
+    with open("mySavedData.json") as outfile:
+
+        # convert the json file into a python object
+        allSavedData = json.load(outfile)
+
+        # get all the names of the color presets
+        allColorPresetNames = list(allSavedData["savedColors"].keys())
+
+        return allColorPresetNames
+
+
+def loadColorPreset():
+
+    # open save data
+    with open("mySavedData.json") as outfile:
+
+        # convert save data into a python object
+        saveData = json.load(outfile)
+
+        # get the currently selected preset name
+        colorPresetName = clicked.get()
+
+        try:
+            # get the array of colors from data using colorPresetName
+            loadedColors = saveData["savedColors"][colorPresetName]
+
+        # preset name doesn't exist
+        except KeyError:
+
+            # give up
+            return
+
+        # go through each line and remove it
+        for i in range(listbox.size()):
+            listbox.delete(0)
+
+        # add each color to our listbox of colors
+        for color in loadedColors:
+
+            listbox.insert("end", color)
+            listbox.itemconfig("end", {"bg": rgb_to_hex(color), "selectbackground": rgb_to_hex(color)})
 
 myColorButtons = []
 myColors = []
@@ -199,5 +259,17 @@ entry_colorPresetName.grid(row=3, column=3)
 # save the colors you've chosen in a json file
 butt_saveColorPreset = tk.Button(master=overlayFrame, text="save color preset", command=saveColorPreset)
 butt_saveColorPreset.grid(row=3, column=4)
+
+# datatype of menu text
+clicked = tk.StringVar()
+
+# initial menu text
+clicked.set("--select a preset--")
+
+drop_colorPresets = tk.OptionMenu(win, clicked, *getColorPresetNames())
+drop_colorPresets.grid(row=1, column=5)
+
+butt_loadInColorPreset = tk.Button(master=win, command=loadColorPreset, text="load Preset")
+butt_loadInColorPreset.grid(row=0, column=5)
 
 win.mainloop()

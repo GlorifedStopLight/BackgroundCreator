@@ -476,11 +476,26 @@ def drawRect(x, y, w, h, c):
 
 
 def deleteColorPreset():
-    x = messagebox.askquestion("Warning", "are you sure you would like \n to delete this color preset?")
+
+    presetName = clicked.get()
+    x = messagebox.askquestion("Warning", "are you sure you would like \n to delete " + presetName + "?")
+
     if x == "yes":
-        print("do it bitch")
-    else:
-        print("jk never do it bestie")
+
+        with open("mySavedData.json") as outfile:
+            savedData = json.load(outfile)
+
+            del savedData["savedColors"][presetName]
+
+        with open("mySavedData.json", "w") as outfile:
+
+            json_object = json.dumps(savedData, indent=4)
+            outfile.write(json_object)
+    """
+    options = list(drop_colorPresets['values'])
+    options.remove(presetName)
+    drop_colorPresets['values'] = options
+    """
 
 #
 class myApp:

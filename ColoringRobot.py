@@ -4,7 +4,9 @@ from math import *
 from threading import Thread
 import json
 from tkinter.colorchooser import askcolor
+from tkinter import ttk
 import time
+from tkinter import messagebox
 
 from tkinter import colorchooser
 
@@ -377,7 +379,7 @@ def getColorPresetNames():
         return allColorPresetNames
 
 
-def loadColorPreset():
+def loadColorPreset(event):
 
     # open save data
     with open("mySavedData.json") as outfile:
@@ -569,11 +571,8 @@ clicked = tk.StringVar()
 # initial menu text
 clicked.set("--select a preset--")
 
-drop_colorPresets = tk.OptionMenu(overlayFrame, clicked, *getColorPresetNames())
+drop_colorPresets = ttk.OptionMenu(overlayFrame, clicked, *getColorPresetNames(), command=loadColorPreset)
 drop_colorPresets.grid(row=5, column=1)
-
-butt_loadInColorPreset = tk.Button(master=overlayFrame, command=loadColorPreset, text="load Preset")
-butt_loadInColorPreset.grid(row=4, column=1)
 
 butt_startGeneration = tk.Button(master=overlayFrame, command=myApp, text="start generation")
 butt_startGeneration.grid(row=10, column=0)

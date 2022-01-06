@@ -429,6 +429,15 @@ def getPresetColors(presetName):
         return allData["savedColors"][presetName]
 
 
+def getCurrentColors():
+    currentColors = []
+
+    for i in range(listbox.size()):
+        currentColors.append(listbox.get(i))
+
+    return currentColors
+
+
 def testing(event):
     global overlayOn
 
@@ -472,15 +481,20 @@ def drawRect(x, y, w, h, c):
             circleMatrix[x][y] = canvas.create_oval(x - w, y - h, x + w, y + h, fill=rgb_to_hex(c), outline='')
 
 
-def generationLoop():
-    while True:
-        for i in range(showEvery):
-            myControl.updateAllThings()
-            myControl2.updateAllThings()
+#
+class myApp:
+    def __init__(self):
+        self.myControl = ControlAll(getCurrentColors(), .5, 3, True)
+        self.myControl2 = ControlAll(getCurrentColors(), .5, 1, True, [0, 0])
 
+        myThreadCool = Thread(target=self.generationLoop)
+        myThreadCool.start()
 
-def generationLoopControlThread():
-    generationLoop()
+    def generationLoop(self):
+        while True:
+            for i in range(showEvery):
+                self.myControl.updateAllThings()
+                self.myControl2.updateAllThings()
 
 
 userPickedSeed = input("input a seed leave blank for random seed: ")
@@ -569,7 +583,7 @@ drop_colorPresets.grid(row=5, column=1)
 butt_loadInColorPreset = tk.Button(master=overlayFrame, command=loadColorPreset, text="load Preset")
 butt_loadInColorPreset.grid(row=4, column=1)
 
-butt_startGeneration = tk.Button(master=overlayFrame, command=generationLoop, text="start generation")
+butt_startGeneration = tk.Button(master=overlayFrame, command=myApp, text="start generation")
 butt_startGeneration.grid(row=10, column=0)
 
 # create and show the frame
@@ -602,8 +616,6 @@ showEvery = 100
 
 overlayOn = True
 
-
-
 win.bind("<Escape>", testing)
 win.attributes('-fullscreen', True)
 
@@ -629,11 +641,5 @@ ResshasNumbers = ((3, 198, 252), (247, 221, 17), (81, 10, 247))
 helenNumebrs = ((61, 128, 81), (128, 201, 232), (133, 36, 9))
 
 totalDotIterationCount = 0
-
-myControl = ControlAll(lFlag, .07, 3, True)
-myControl2 = ControlAll(lFlag, .1, 1, True, [0, 0])
-
-myThreadCool = Thread(target=generationLoop)
-myThreadCool.start()
 
 win.mainloop()

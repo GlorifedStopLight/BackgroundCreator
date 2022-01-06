@@ -2,139 +2,13 @@ import tkinter as tk
 from random import *
 from math import *
 from threading import Thread
+import json
+from tkinter.colorchooser import askcolor
 
 from tkinter import colorchooser
 
 # from playsound import playsound
 
-
-def testing(event):
-    global overlayOff, canvas
-
-    if overlayOff:
-
-        frame.pack_forget()
-        overlayFrame.pack()
-        #dotsDrawnCount.insert('end', str(totalDotIterationCount))
-        #dotsDrawnCount.pack()
-
-        overlayOff = False
-
-    else:
-
-        frame.pack()
-        overlayFrame.pack_forget()
-
-        overlayOff = True
-    win.update()
-
-
-def rgb_to_hex(rgb):
-    rgb = int(rgb[0]), int(rgb[1]), int(rgb[2])
-
-    return '#%02x%02x%02x' % rgb
-
-
-def drawRect(x, y, w, h, c):
-
-    if 0 <= y <= height and 0 <= x <= width:
-
-        # spot is empty
-        if circleMatrix[x][y] is None:
-
-            # add new circle to our matrix
-            circleMatrix[x][y] = canvas.create_oval(x-w, y-h, x+w, y+h, fill=rgb_to_hex(c), outline='')
-
-        # trying to put a circle over an old circle
-        else:
-
-            # delete old circle
-            canvas.delete(circleMatrix[x][y])
-
-            # add new circle to our matrix
-            circleMatrix[x][y] = canvas.create_oval(x - w, y - h, x + w, y + h, fill=rgb_to_hex(c), outline='')
-
-
-userPickedSeed = input("input a seed leave blank for random seed: ")
-
-if userPickedSeed == "":
-    userPickedSeed = randint(0, 99999999)
-    print(userPickedSeed)
-else:
-    userPickedSeed = int(userPickedSeed)
-
-seed(userPickedSeed)
-
-# 1366
-width = 1366
-
-# 768
-height = 768
-
-s = 5
-
-circleMatrix = []
-for i in range(width + 1):
-    tempList = []
-    for j in range(height + 1):
-        tempList.append(None)
-
-    circleMatrix.append(tempList.copy())
-
-
-win = tk.Tk()
-
-# create and show the frame
-frame = tk.Frame(win, width=width, height=height)
-frame.pack(expand=True, fill=tk.BOTH)
-
-# create a canvas for the frame
-canvas = tk.Canvas(master=frame, bg='#FFFFFF', width=width, height=height, scrollregion=(0, 0, 500, 500))
-overlayFrame = tk.Frame(master=win, bg='#000000', width=width, height=height)
-overlayFrame.pack()
-
-# text
-seedDisplayer = tk.Text(master=overlayFrame)
-seedDisplayer.config(font=("Helvetica", 36))
-seedDisplayer.pack()
-seedDisplayer.insert("end", str(userPickedSeed))
-
-#
-dotsDrawnCount = tk.Button(master=overlayFrame, text="sup dawg", bg="#0000FF")
-dotsDrawnCount.config(font=("Helvetica", 36))
-dotsDrawnCount.pack()
-
-overlayFrame.pack_forget()
-canvas.pack()
-
-
-# create horizontal and vertical scroll bars
-hbar = tk.Scrollbar(frame, orient=tk.HORIZONTAL)
-vbar = tk.Scrollbar(frame, orient=tk.VERTICAL)
-
-# show these scroll bars
-hbar.pack(side=tk.BOTTOM, fill=tk.X)
-vbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-# configure the scroll bars to move the canvas left right up and down
-hbar.config(command=canvas.xview)
-vbar.config(command=canvas.yview)
-
-# do the same to canvas
-canvas.config(width=width, height=height)
-canvas.config(xscrollcommand=hbar.set, yscrollcommand=vbar.set)
-
-# show canvas in frame
-canvas.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
-
-
-win.bind("<Escape>", testing)
-win.attributes('-fullscreen', True)
-
-#testTextBox.pack_forget()
-
-#lab = Label(canvas, text=str(userPickedSeed))
-#lab.pack()
 
 def blackAndWhite(c):
     global switch
@@ -392,17 +266,351 @@ class ControlAll:
         cordsThread.join()
 
 
-overlayOff = False
+class DragDropListbox(tk.Listbox):
+    """ A Tkinter listbox with drag'n'drop reordering of entries. """
+    def __init__(self, master, **kw):
+        kw['selectmode'] = tk.SINGLE
+        tk.Listbox.__init__(self, master, kw)
+        self.bind('<Button-1>', self.setCurrent)
+        self.bind('<B1-Motion>', self.shiftSelection)
+        self.curIndex = None
+
+    def setCurrent(self, event):
+        self.curIndex = self.nearest(event.y)
+
+    def shiftSelection(self, event):
+        i = self.nearest(event.y)
+        if i < self.curIndex:
+            x = self.get(i)
+            self.delete(i)
+            self.insert(i+1, x)
+            self.itemconfig(i+1, {"bg": x, "selectbackground": x})
+            self.curIndex = i
+        elif i > self.curIndex:
+            x = self.get(i)
+            self.delete(i)
+            self.insert(i-1, x)
+            self.itemconfig(i - 1, {"bg": x, "selectbackground": x})
+            self.curIndex = i
+
+
+def hex_to_rgb(value):
+    value = value.lstrip('#')
+    lv = len(value)
+    return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+
+
+def saveUserInput():
+
+    if seedNameInput.get() == "" or seedCodeInput.get() == "":
+        return
+
+    with open("mySavedData.json") as outfile:
+
+        # load all of the current presets
+        info = json.load(outfile)
+
+        # add another seed
+        info["savedSeeds"][seedNameInput.get()] = seedCodeInput.get()
+
+        json_object = json.dumps(info, indent=4)
+
+    # Writing to sample.json
+    with open("mySavedData.json", "w") as outfile:
+
+        outfile.write(json_object)
+
+
+def addColor():
+    myColors.append(askcolor(title="Tkinter Color Chooser")[1])
+    listbox.insert("end", myColors[-1])
+    listbox.itemconfig("end", {"bg": myColors[-1], "selectbackground": myColors[-1]})
+
+
+def removeSelectedColor():
+    listbox.delete(listbox.curselection())
+
+
+def saveColorPreset():
+    global drop_colorPresets
+
+    if entry_colorPresetName.get() == "":
+        print("no given name for preset")
+        return
+
+    with open("mySavedData.json") as outfile:
+
+        # load all of the current presets
+        info = json.load(outfile)
+
+        # initialize the list for colors
+        presetColors = []
+
+        # loop through each line in listbox
+        for i in range(listbox.size()):
+
+            # add the name to the list (the name is a color)
+            presetColors.append(hex_to_rgb(listbox.get(i)))
+
+        # create a new color preset
+        info["savedColors"][entry_colorPresetName.get()] = presetColors
+
+        # create a json object
+        json_object = json.dumps(info, indent=4)
+
+    # Writing to sample.json
+    with open("mySavedData.json", "w") as outfile:
+
+        outfile.write(json_object)
+
+    menu = drop_colorPresets["menu"]
+    menu.delete(0, "end")
+    for string in getColorPresetNames():
+        menu.add_command(label=string,
+                         command=lambda value=string: clicked.set(value))
+
+
+# returns a list of strings which are the names of saved color presets
+def getColorPresetNames():
+
+    # open json file (contains saved information)
+    with open("mySavedData.json") as outfile:
+
+        # convert the json file into a python object
+        allSavedData = json.load(outfile)
+
+        # get all the names of the color presets
+        allColorPresetNames = list(allSavedData["savedColors"].keys())
+
+        return allColorPresetNames
+
+
+def loadColorPreset():
+
+    # open save data
+    with open("mySavedData.json") as outfile:
+
+        # convert save data into a python object
+        saveData = json.load(outfile)
+
+        # get the currently selected preset name
+        colorPresetName = clicked.get()
+
+        try:
+            # get the array of colors from data using colorPresetName
+            loadedColors = saveData["savedColors"][colorPresetName]
+
+        # preset name doesn't exist
+        except KeyError:
+
+            # give up
+            return
+
+        # go through each line and remove it
+        for i in range(listbox.size()):
+            listbox.delete(0)
+
+        # add each color to our listbox of colors
+        for color in loadedColors:
+
+            listbox.insert("end", color)
+            listbox.itemconfig("end", {"bg": rgb_to_hex(color), "selectbackground": rgb_to_hex(color)})
+
+
+def getPresetColors(presetName):
+
+    # open json file
+    with open("mySavedData.json") as outfile:
+
+        # load saved data as python object
+        allData = json.load(outfile)
+
+        # return colors
+        return allData["savedColors"][presetName]
+
+
+def testing(event):
+    global overlayOn
+
+    if overlayOn:
+
+        overlayFrame.grid_forget()
+        frame.grid(row=0, column=0)
+
+        overlayOn = False
+
+    else:
+        frame.grid_forget()
+        overlayFrame.grid(row=0, column=0)
+
+        overlayOn = True
+
+
+def rgb_to_hex(rgb):
+    rgb = int(rgb[0]), int(rgb[1]), int(rgb[2])
+
+    return '#%02x%02x%02x' % rgb
+
+
+def drawRect(x, y, w, h, c):
+
+    if 0 <= y <= height and 0 <= x <= width:
+
+        # spot is empty
+        if circleMatrix[x][y] is None:
+
+            # add new circle to our matrix
+            circleMatrix[x][y] = canvas.create_oval(x-w, y-h, x+w, y+h, fill=rgb_to_hex(c), outline='')
+
+        # trying to put a circle over an old circle
+        else:
+
+            # delete old circle
+            canvas.delete(circleMatrix[x][y])
+
+            # add new circle to our matrix
+            circleMatrix[x][y] = canvas.create_oval(x - w, y - h, x + w, y + h, fill=rgb_to_hex(c), outline='')
+
+
+def generationLoop():
+    while True:
+        for i in range(showEvery):
+            myControl.updateAllThings()
+            myControl2.updateAllThings()
+
+
+def generationLoopControlThread():
+    generationLoop()
+
+
+userPickedSeed = input("input a seed leave blank for random seed: ")
+
+if userPickedSeed == "":
+    userPickedSeed = randint(0, 99999999)
+    print(userPickedSeed)
+else:
+    userPickedSeed = int(userPickedSeed)
+
+seed(userPickedSeed)
+
+# 1366
+width = 1366
+
+# 768
+height = 768
+
+s = 5
+
+circleMatrix = []
+for i in range(width + 1):
+    tempList = []
+    for j in range(height + 1):
+        tempList.append(None)
+
+    circleMatrix.append(tempList.copy())
+
+
+myColorButtons = []
+myColors = []
+
+win = tk.Tk()
+overlayFrame = tk.Frame(master=win)
+overlayFrame.grid(row=0, column=0)
+
+# list of colors
+listbox = DragDropListbox(master=win)
+listbox.grid(row=6, column=0)
+listbox.config(selectborderwidth=5, relief=tk.SUNKEN, exportselection=False, activestyle=tk.UNDERLINE)
+
+# gets the desired seed to save
+seedCodeInput = tk.Entry(master=overlayFrame, width=50)
+seedCodeInput.grid(row=2, column=0)
+
+#
+seedInputLabel = tk.Label(master=overlayFrame, text="input your seed below")
+seedInputLabel.grid(row=1, column=0)
+
+# gets the name for the seed
+seedNameInput = tk.Entry(master=overlayFrame, width=50)
+seedNameInput.grid(row=4, column=0)
+
+#
+seedNameInputLabel = tk.Label(master=overlayFrame, text="input your seed name below")
+seedNameInputLabel.grid(row=3, column=0)
+
+saveSeedButton = tk.Button(master=overlayFrame, text="Save Seed", command=saveUserInput)
+saveSeedButton.grid(row=0, column=0)
+
+# add color
+wantColor = tk.Button(master=overlayFrame, text="choose color", command=addColor)
+wantColor.grid(row=5, column=2)
+
+# button to remove color
+removeColorButton = tk.Button(master=overlayFrame, text="Remove Selected Color", command=removeSelectedColor)
+removeColorButton.grid(row=2, column=3)
+
+# gets the name for the seed
+entry_colorPresetName = tk.Entry(master=overlayFrame, width=50)
+entry_colorPresetName.grid(row=3, column=3)
+
+# save the colors you've chosen in a json file
+butt_saveColorPreset = tk.Button(master=overlayFrame, text="save color preset", command=saveColorPreset)
+butt_saveColorPreset.grid(row=4, column=0)
+
+# datatype of menu text
+clicked = tk.StringVar()
+
+# initial menu text
+clicked.set("--select a preset--")
+
+drop_colorPresets = tk.OptionMenu(overlayFrame, clicked, *getColorPresetNames())
+drop_colorPresets.grid(row=5, column=1)
+
+butt_loadInColorPreset = tk.Button(master=overlayFrame, command=loadColorPreset, text="load Preset")
+butt_loadInColorPreset.grid(row=4, column=1)
+
+butt_startGeneration = tk.Button(master=overlayFrame, command=generationLoop, text="start generation")
+butt_startGeneration.grid(row=10, column=0)
+
+# create and show the frame
+frame = tk.Frame(win, width=width, height=height)
+
+# create a canvas for the frame
+canvas = tk.Canvas(master=frame, bg='#FFFFFF', width=width, height=height, scrollregion=(0, 0, 500, 500))
+canvas.pack()
+
+# create horizontal and vertical scroll bars
+hbar = tk.Scrollbar(frame, orient=tk.HORIZONTAL)
+vbar = tk.Scrollbar(frame, orient=tk.VERTICAL)
+
+# show these scroll bars
+hbar.pack(side=tk.BOTTOM, fill=tk.X)
+vbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+# configure the scroll bars to move the canvas left right up and down
+hbar.config(command=canvas.xview)
+vbar.config(command=canvas.yview)
+
+# do the same to canvas
+canvas.config(width=width, height=height)
+canvas.config(xscrollcommand=hbar.set, yscrollcommand=vbar.set)
+
+# show canvas in frame
+canvas.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
+
+showEvery = 100
+
+overlayOn = True
+
+
+
+win.bind("<Escape>", testing)
+win.attributes('-fullscreen', True)
+
 
 hi = 255
 lo = 0.1
-c = [width//2, height//2]
-#co = [lo, lo, hi]
-col = [lo, lo, hi]
-
 m = .3
-
-showEvery = 100
 
 compColors = ((22, 255, 236), (255, 193, 22), (255, 22, 146))
 handPickedBlues = ((105, 255, 172), (52, 206, 68), (107, 66, 255), (133, 188, 255), (5, 255, 238))
@@ -425,14 +633,7 @@ totalDotIterationCount = 0
 myControl = ControlAll(lFlag, .07, 3, True)
 myControl2 = ControlAll(lFlag, .1, 1, True, [0, 0])
 
-while True:
-    win.update()
+myThreadCool = Thread(target=generationLoop)
+myThreadCool.start()
 
-    if overlayOff:
-
-        for i in range(showEvery):
-
-            myControl.updateAllThings()
-            myControl2.updateAllThings()
-
-        totalDotIterationCount += showEvery
+win.mainloop()

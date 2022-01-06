@@ -214,6 +214,19 @@ def loadColorPreset():
             listbox.insert("end", color)
             listbox.itemconfig("end", {"bg": rgb_to_hex(color), "selectbackground": rgb_to_hex(color)})
 
+
+def getPresetColors(presetName):
+
+    # open json file
+    with open("mySavedData.json") as outfile:
+
+        # load saved data as python object
+        allData = json.load(outfile)
+
+        # return colors
+        return allData["savedColors"][presetName]
+
+
 myColorButtons = []
 myColors = []
 

@@ -7,75 +7,8 @@ from tkinter.colorchooser import askcolor
 from tkinter import ttk
 import time
 from tkinter import messagebox
-
+import multiprocessing as mp
 from tkinter import colorchooser
-
-# from playsound import playsound
-
-
-def blackAndWhite(c):
-    global switch
-    c = list(c)
-
-    if switch:
-
-        if c[0] + m < hi:
-            c[0], c[1], c[2] = c[0] + m, c[1] + m, c[2] + m
-        elif c[0] - m > lo:
-            c[0], c[1], c[2] = c[0] - m, c[1] - m, c[2] - m
-            switch = False
-    else:
-
-        if c[0] - m > lo:
-            c[0], c[1], c[2] = c[0] - m, c[1] - m, c[2] - m
-        elif c[0] + m < hi:
-            c[0], c[1], c[2] = c[0] + m, c[1] + m, c[2] + m
-            switch = True
-
-
-    return c
-
-
-def rainbow(c):
-    if c[2] <= lo < c[0] and c[1] >= hi:
-        c[0] -= m
-
-    elif c[0] <= lo < c[1] and c[2] >= hi:
-        c[1] -= m
-
-    elif c[1] <= lo and c[2] >= hi > c[0]:
-        c[0] += m
-
-    elif c[2] <= lo and c[0] >= hi > c[1]:
-        c[1] += m
-
-    elif c[1] <= lo < c[2] and c[0] >= hi:
-        c[2] -= m
-
-    elif c[0] <= lo and c[1] >= hi > c[2]:
-        c[2] += m
-
-    return c
-
-
-def changeColorRandom(c):
-    c = list(c)
-    if c[0] + 10 < hi:
-        c[0] += randint(0, 10)
-    if c[0] - 10 > lo:
-        c[0] += randint(-10, 0)
-
-    if c[1] + 10 < hi:
-        c[1] += randint(0, 10)
-    if c[1] - 10 > lo:
-        c[1] += randint(-10, 0)
-
-    if c[2] + 10 < hi:
-        c[2] += randint(0, 10)
-    if c[2] - 10 > lo:
-        c[2] += randint(-10, 0)
-
-    return c
 
 
 def normal_round(n):
@@ -86,7 +19,7 @@ def normal_round(n):
 
 class DotMaker:
 
-    def __init__(self, splitReflections, isMirrored, followThisDot=None, startLocation=None):
+    def __init__(self, splitReflections, isMirrored, colorsToFadeTo, fadeSpeed, followThisDot=None, startLocation=None):
 
         if isMirrored:
             radianAmount = 2*pi / splitReflections / 2
@@ -106,7 +39,36 @@ class DotMaker:
         else:
             self.cords = startLocation
 
-    def getDotCreationInfo(self, currentColor):
+
+        # a list of colors that the user wants to fade to (in order)
+        self.colorsToFadeTo = colorsToFadeTo
+
+        # the current color starts at the first color in the list
+        self.currentColor = list(colorsToFadeTo[0])
+
+        # the last specific color that we faded from (given by user)
+        self.previousColor = colorsToFadeTo[0]
+
+        # the index of the color from our list that we are going to
+        self.fadeToColorIndex = 1
+
+        # the color that we are fading to
+        self.nextColor = colorsToFadeTo[1]
+
+        # how fast we fade from one color to the next
+        self.fadeSpeed = fadeSpeed
+
+        i = fadeSpeed
+        while i < 1:
+            i += fadeSpeed
+
+        self.newColorGracePeriod = i
+
+        self.currentGrace = 0
+
+        self.feedGrace = True
+
+    def getDotCreationInfo(self):
         x = self.cords[0]
         y = self.cords[1]
 
@@ -114,11 +76,11 @@ class DotMaker:
 
         for i in range(self.splitReflections):
 
-            self.drawThese.append((int(x), int(y), s, s, currentColor))
+            self.drawThese.append((int(x), int(y), s, s, self.currentColor))
             if self.isMirrored:
-                self.drawThese.append((int(-x+width), int(y), s, s, currentColor))
-                self.drawThese.append((int(x), int(-y+height), s, s, currentColor))
-                self.drawThese.append((int(-x+width), int(-y+height), s, s, currentColor))
+                self.drawThese.append((int(-x+width), int(y), s, s, self.currentColor))
+                self.drawThese.append((int(x), int(-y+height), s, s, self.currentColor))
+                self.drawThese.append((int(-x+width), int(-y+height), s, s, self.currentColor))
 
             x, y = ((x - self.center[0]) * self.cosine - (y - self.center[1]) * self.sine + self.center[0]),\
                    ((x - self.center[0]) * self.sine + (y - self.center[1]) * self.cosine + self.center[1])
@@ -134,6 +96,53 @@ class DotMaker:
     def changeCordsThread(self):
         self.cords[0] = abs(abs(self.cords[0] + choice((-s, s)) - width) - width)
         self.cords[1] = abs(abs(self.cords[1] + choice((-s, s)) - height) - height)
+
+    # doesn't return anything just calculates the next color
+    def getNextColor(self):
+
+        # add to current grace
+        if self.feedGrace:
+            self.currentGrace += self.fadeSpeed
+            if self.newColorGracePeriod <= self.currentGrace:
+                self.feedGrace = False
+
+        # have arrived at the desired color
+        if [normal_round(self.currentColor[0]), normal_round(self.currentColor[1]), normal_round(self.currentColor[2])] == list(self.nextColor) and\
+                self.newColorGracePeriod <= self.currentGrace:
+
+            self.currentGrace = 0
+            self.feedGrace = True
+
+            # last color in the list start from the beginning
+            if self.fadeToColorIndex + 1 == len(self.colorsToFadeTo):
+                self.fadeToColorIndex = 0
+
+            else:
+                self.fadeToColorIndex += 1
+
+            self.currentColor = list(self.nextColor)
+            self.previousColor = self.nextColor
+            self.nextColor = self.colorsToFadeTo[self.fadeToColorIndex]
+
+        # change red green and blue
+        for i in range(3):
+
+            # subtract
+            if self.previousColor[i] > self.nextColor[i]:
+
+                # not done subtracting
+                if self.currentColor[i] - self.fadeSpeed >= self.nextColor[i]:
+                    self.currentColor[i] -= self.fadeSpeed
+
+            # add
+            else:
+
+                # not done adding
+                if self.currentColor[i] + self.fadeSpeed <= self.nextColor[i]:
+                    self.currentColor[i] += self.fadeSpeed
+
+        # return the updated current color
+        return self.currentColor
 
 
 # a class t
@@ -216,48 +225,31 @@ class CustomColorFade:
         return self.currentColor
 
 
-class ThreadWithReturnValue(Thread):
-    def __init__(self, group=None, target=None, name=None,
-                 args=(), kwargs={}, Verbose=None):
-        Thread.__init__(self, group, target, name, args, kwargs)
-        self._return = None
-
-    def run(self):
-        if self._target is not None:
-            self._return = self._target(*self._args, **self._kwargs)
-
-    def join(self, *args):
-        Thread.join(self, *args)
-        return self._return
-
-
 class ControlAll:
     def __init__(self, colorSelection, colorSpeed, branchNumber, isBranchesMirrored, startLocation=None):
-        self.dotFactoryObj = DotMaker(branchNumber, isBranchesMirrored, startLocation=startLocation)
-
-        self.myColors = CustomColorFade(colorSelection, colorSpeed)
-        self.getColorThread = ThreadWithReturnValue(target=self.myColors.getNextColor)
-        self.getColorThread.start()
-        self.dotColor = self.getColorThread.join()
+        self.dotFactoryObj = DotMaker(branchNumber, isBranchesMirrored, colorSelection, colorSpeed, startLocation=startLocation)
+        toggleOverlay(None)
 
     def updateAllThings(self):
 
-        getColorThread = ThreadWithReturnValue(target=self.myColors.getNextColor)
+        getColorThread = Thread(target=self.dotFactoryObj.getNextColor)
+        doDotThread = Thread(target=self.dotFactoryObj.getDotCreationInfo)
+        cordsThread = Thread(target=self.dotFactoryObj.changeCordsThread)
 
         getColorThread.start()
-
-        doDotThread = ThreadWithReturnValue(target=self.dotFactoryObj.getDotCreationInfo, args=(self.dotColor,))
         doDotThread.start()
-
-        cordsThread = ThreadWithReturnValue(target=self.dotFactoryObj.changeCordsThread)
         cordsThread.start()
 
-        # join all threads
-        doDotThread.join()
-        self.dotColor = getColorThread.join()
-        cordsThread.join()
+        #getColorThread = mp.Process(target=self.myColors.getNextColor)
+        #getColorThread.start()
 
-        self.dotFactoryObj.createDot()  # 0.056 - 0.01 seconds
+        # join all threads
+        #getColorThread.join()
+        #doDotThread.join()
+        #cordsThread.join()
+
+        self.dotFactoryObj.createDot()
+        # 0.0041-0.025 (with threading)
 
 
 class DragDropListbox(tk.Listbox):
@@ -294,9 +286,9 @@ def hex_to_rgb(value):
     return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
 
-def saveUserInput():
+def saveUserGivenSeed():
 
-    if seedNameInput.get() == "" or seedCodeInput.get() == "":
+    if seedNameInput.get() == "" or entry_seedInput.get() == "":
         return
 
     with open("mySavedData.json") as outfile:
@@ -305,7 +297,7 @@ def saveUserInput():
         info = json.load(outfile)
 
         # add another seed
-        info["savedSeeds"][seedNameInput.get()] = seedCodeInput.get()
+        info["savedSeeds"][seedNameInput.get()] = entry_seedInput.get()
 
         json_object = json.dumps(info, indent=4)
 
@@ -315,14 +307,14 @@ def saveUserInput():
         outfile.write(json_object)
 
 
-def addColor():
+def addColorToColorPallet():
     myColors.append(askcolor(title="Tkinter Color Chooser")[1])
-    listbox.insert("end", myColors[-1])
-    listbox.itemconfig("end", {"bg": myColors[-1], "selectbackground": myColors[-1]})
+    listbox_colorPallet.insert("end", myColors[-1])
+    listbox_colorPallet.itemconfig("end", {"bg": myColors[-1], "selectbackground": myColors[-1]})
 
 
-def removeSelectedColor():
-    listbox.delete(listbox.curselection())
+def removeSelectedColorFromColorPallet():
+    listbox_colorPallet.delete(listbox_colorPallet.curselection())
 
 
 def saveColorPreset():
@@ -341,10 +333,10 @@ def saveColorPreset():
         presetColors = []
 
         # loop through each line in listbox
-        for i in range(listbox.size()):
+        for i in range(listbox_colorPallet.size()):
 
             # add the name to the list (the name is a color)
-            presetColors.append(hex_to_rgb(listbox.get(i)))
+            presetColors.append(hex_to_rgb(listbox_colorPallet.get(i)))
 
         # create a new color preset
         info["savedColors"][entry_colorPresetName.get()] = presetColors
@@ -361,7 +353,7 @@ def saveColorPreset():
     menu.delete(0, "end")
     for string in getColorPresetNames():
         menu.add_command(label=string,
-                         command=lambda value=string: clicked.set(value))
+                         command=lambda value=string: dropSelected_colorPalletPresets.set(value))
 
 
 # returns a list of strings which are the names of saved color presets
@@ -388,7 +380,7 @@ def loadColorPreset(event):
         saveData = json.load(outfile)
 
         # get the currently selected preset name
-        colorPresetName = clicked.get()
+        colorPresetName = dropSelected_colorPalletPresets.get()
 
         try:
             # get the array of colors from data using colorPresetName
@@ -401,14 +393,14 @@ def loadColorPreset(event):
             return
 
         # go through each line and remove it
-        for i in range(listbox.size()):
-            listbox.delete(0)
+        for i in range(listbox_colorPallet.size()):
+            listbox_colorPallet.delete(0)
 
         # add each color to our listbox of colors
         for color in loadedColors:
 
-            listbox.insert("end", color)
-            listbox.itemconfig("end", {"bg": rgb_to_hex(color), "selectbackground": rgb_to_hex(color)})
+            listbox_colorPallet.insert("end", color)
+            listbox_colorPallet.itemconfig("end", {"bg": rgb_to_hex(color), "selectbackground": rgb_to_hex(color)})
 
 
 def getPresetColors(presetName):
@@ -423,16 +415,16 @@ def getPresetColors(presetName):
         return allData["savedColors"][presetName]
 
 
-def getCurrentColors():
+def getCurrentColorPalletColors():
     currentColors = []
 
-    for i in range(listbox.size()):
-        currentColors.append(listbox.get(i))
+    for i in range(listbox_colorPallet.size()):
+        currentColors.append(listbox_colorPallet.get(i))
 
     return currentColors
 
 
-def testing(event):
+def toggleOverlay(event):
     global overlayOn
 
     if overlayOn:
@@ -463,21 +455,21 @@ def drawRect(x, y, w, h, c):
         if circleMatrix[x][y] is None:
 
             # add new circle to our matrix
-            circleMatrix[x][y] = canvas.create_oval(x-w, y-h, x+w, y+h, fill=rgb_to_hex(c), outline='')
+            circleMatrix[x][y] = canvas_mandala.create_oval(x - w, y - h, x + w, y + h, fill=rgb_to_hex(c), outline='')
 
         # trying to put a circle over an old circle
         else:
 
             # delete old circle
-            canvas.delete(circleMatrix[x][y])
+            canvas_mandala.delete(circleMatrix[x][y])
 
             # add new circle to our matrix
-            circleMatrix[x][y] = canvas.create_oval(x - w, y - h, x + w, y + h, fill=rgb_to_hex(c), outline='')
+            circleMatrix[x][y] = canvas_mandala.create_oval(x - w, y - h, x + w, y + h, fill=rgb_to_hex(c), outline='')
 
 
 def deleteColorPreset():
 
-    presetName = clicked.get()
+    presetName = dropSelected_colorPalletPresets.get()
     x = messagebox.askquestion("Warning", "are you sure you would like \n to delete " + presetName + "?")
 
     if x == "yes":
@@ -497,31 +489,21 @@ def deleteColorPreset():
     drop_colorPresets['values'] = options
     """
 
+
 #
 class myApp:
     def __init__(self):
-        self.myControl = ControlAll(getCurrentColors(), .5, 3, True)
-        self.myControl2 = ControlAll(getCurrentColors(), .5, 1, True, [0, 0])
+
+        self.myControl = ControlAll(getCurrentColorPalletColors(), .5, 3, True)
+        #self.myControl2 = ControlAll(getCurrentColors(), .5, 1, True, [0, 0])
 
         myThreadCool = Thread(target=self.generationLoop)
         myThreadCool.start()
 
     def generationLoop(self):
         while True:
-            for i in range(showEvery):
-                self.myControl.updateAllThings()
-                self.myControl2.updateAllThings()
-
-
-userPickedSeed = input("input a seed leave blank for random seed: ")
-
-if userPickedSeed == "":
-    userPickedSeed = randint(0, 99999999)
-    print(userPickedSeed)
-else:
-    userPickedSeed = int(userPickedSeed)
-
-seed(userPickedSeed)
+            self.myControl.updateAllThings()
+            #self.myControl2.updateAllThings()
 
 # 1366
 width = 1366
@@ -539,8 +521,16 @@ for i in range(width + 1):
 
     circleMatrix.append(tempList.copy())
 
+userPickedSeed = input("input a seed leave blank for random seed: ")
 
-myColorButtons = []
+if userPickedSeed == "":
+    userPickedSeed = randint(0, 1000000000)
+    print(userPickedSeed)
+else:
+    userPickedSeed = int(userPickedSeed)
+
+seed(userPickedSeed)
+
 myColors = []
 
 win = tk.Tk()
@@ -548,13 +538,13 @@ overlayFrame = tk.Frame(master=win)
 overlayFrame.grid(row=0, column=0)
 
 # list of colors
-listbox = DragDropListbox(master=win)
-listbox.grid(row=6, column=0)
-listbox.config(selectborderwidth=5, relief=tk.SUNKEN, exportselection=False, activestyle=tk.UNDERLINE)
+listbox_colorPallet = DragDropListbox(master=win)
+listbox_colorPallet.grid(row=6, column=0)
+listbox_colorPallet.config(selectborderwidth=5, relief=tk.SUNKEN, exportselection=False, activestyle=tk.UNDERLINE)
 
 # gets the desired seed to save
-seedCodeInput = tk.Entry(master=overlayFrame, width=50)
-seedCodeInput.grid(row=2, column=0)
+entry_seedInput = tk.Entry(master=overlayFrame, width=50)
+entry_seedInput.grid(row=2, column=0)
 
 #
 seedInputLabel = tk.Label(master=overlayFrame, text="input your seed below")
@@ -568,16 +558,17 @@ seedNameInput.grid(row=4, column=0)
 seedNameInputLabel = tk.Label(master=overlayFrame, text="input your seed name below")
 seedNameInputLabel.grid(row=3, column=0)
 
-saveSeedButton = tk.Button(master=overlayFrame, text="Save Seed", command=saveUserInput)
-saveSeedButton.grid(row=0, column=0)
+# save seed
+butt_saveSeed = tk.Button(master=overlayFrame, text="Save Seed", command=saveUserGivenSeed)
+butt_saveSeed.grid(row=0, column=0)
 
 # add color
-wantColor = tk.Button(master=overlayFrame, text="choose color", command=addColor)
-wantColor.grid(row=5, column=2)
+butt_chooseColor = tk.Button(master=overlayFrame, text="choose color", command=addColorToColorPallet)
+butt_chooseColor.grid(row=5, column=2)
 
 # button to remove color
-removeColorButton = tk.Button(master=overlayFrame, text="Remove Selected Color", command=removeSelectedColor)
-removeColorButton.grid(row=2, column=3)
+butt_removeColor = tk.Button(master=overlayFrame, text="Remove Selected Color", command=removeSelectedColorFromColorPallet)
+butt_removeColor.grid(row=2, column=3)
 
 # gets the name for the seed
 entry_colorPresetName = tk.Entry(master=overlayFrame, width=50)
@@ -592,14 +583,15 @@ butt_deleteColorPreset = tk.Button(master=overlayFrame, text="delete color prese
 butt_deleteColorPreset.grid(row=5, column=0)
 
 # datatype of menu text
-clicked = tk.StringVar()
+dropSelected_colorPalletPresets = tk.StringVar()
 
 # initial menu text
-clicked.set("--select a preset--")
+dropSelected_colorPalletPresets.set("--select a preset--")
 
-drop_colorPresets = ttk.OptionMenu(overlayFrame, clicked, *getColorPresetNames(), command=loadColorPreset)
+drop_colorPresets = ttk.OptionMenu(overlayFrame, dropSelected_colorPalletPresets, *getColorPresetNames(), command=loadColorPreset)
 drop_colorPresets.grid(row=5, column=1)
 
+# generates a mandala
 butt_startGeneration = tk.Button(master=overlayFrame, command=myApp, text="start generation")
 butt_startGeneration.grid(row=10, column=0)
 
@@ -607,8 +599,8 @@ butt_startGeneration.grid(row=10, column=0)
 frame = tk.Frame(win, width=width, height=height)
 
 # create a canvas for the frame
-canvas = tk.Canvas(master=frame, bg='#FFFFFF', width=width, height=height, scrollregion=(0, 0, 500, 500))
-canvas.pack()
+canvas_mandala = tk.Canvas(master=frame, bg='#FFFFFF', width=width, height=height, scrollregion=(0, 0, 500, 500))
+canvas_mandala.pack()
 
 # create horizontal and vertical scroll bars
 hbar = tk.Scrollbar(frame, orient=tk.HORIZONTAL)
@@ -619,23 +611,22 @@ hbar.pack(side=tk.BOTTOM, fill=tk.X)
 vbar.pack(side=tk.RIGHT, fill=tk.Y)
 
 # configure the scroll bars to move the canvas left right up and down
-hbar.config(command=canvas.xview)
-vbar.config(command=canvas.yview)
+hbar.config(command=canvas_mandala.xview)
+vbar.config(command=canvas_mandala.yview)
 
 # do the same to canvas
-canvas.config(width=width, height=height)
-canvas.config(xscrollcommand=hbar.set, yscrollcommand=vbar.set)
+canvas_mandala.config(width=width, height=height)
+canvas_mandala.config(xscrollcommand=hbar.set, yscrollcommand=vbar.set)
 
 # show canvas in frame
-canvas.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
+canvas_mandala.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
 
 showEvery = 100
 
 overlayOn = True
 
-win.bind("<Escape>", testing)
+win.bind("<Escape>", toggleOverlay)
 win.attributes('-fullscreen', True)
-
 
 hi = 255
 lo = 0.1

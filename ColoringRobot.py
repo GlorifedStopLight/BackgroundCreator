@@ -308,7 +308,7 @@ def saveUserGivenSeed():
 
 
 def addColorToColorPallet():
-    myColors.append(askcolor(title="Tkinter Color Chooser")[1])
+    myColors.append(askcolor(title="Tkinter Color Chooser")[0])
     listbox_colorPallet.insert("end", myColors[-1])
     listbox_colorPallet.itemconfig("end", {"bg": myColors[-1], "selectbackground": myColors[-1]})
 
@@ -534,13 +534,13 @@ seed(userPickedSeed)
 myColors = []
 
 win = tk.Tk()
-overlayFrame = tk.Frame(master=win)
+overlayFrame = tk.Frame(master=win, bd=30)
 overlayFrame.grid(row=0, column=0)
 
 # list of colors
 listbox_colorPallet = DragDropListbox(master=win)
-listbox_colorPallet.grid(row=6, column=0)
-listbox_colorPallet.config(selectborderwidth=5, relief=tk.SUNKEN, exportselection=False, activestyle=tk.UNDERLINE)
+listbox_colorPallet.grid(row=7, column=0)
+listbox_colorPallet.config(selectborderwidth=5, relief=tk.SUNKEN, exportselection=False, activestyle=tk.UNDERLINE, width=15, height=9)
 
 # gets the desired seed to save
 entry_seedInput = tk.Entry(master=overlayFrame, width=50)
@@ -553,6 +553,7 @@ seedInputLabel.grid(row=1, column=0)
 # gets the name for the seed
 seedNameInput = tk.Entry(master=overlayFrame, width=50)
 seedNameInput.grid(row=4, column=0)
+seedNameInput.insert(0, "input your seed name below")
 
 #
 seedNameInputLabel = tk.Label(master=overlayFrame, text="input your seed name below")
@@ -568,7 +569,7 @@ butt_chooseColor.grid(row=5, column=2)
 
 # button to remove color
 butt_removeColor = tk.Button(master=overlayFrame, text="Remove Selected Color", command=removeSelectedColorFromColorPallet)
-butt_removeColor.grid(row=2, column=3)
+butt_removeColor.grid(row=7, column=2)
 
 # gets the name for the seed
 entry_colorPresetName = tk.Entry(master=overlayFrame, width=50)
@@ -576,11 +577,11 @@ entry_colorPresetName.grid(row=3, column=3)
 
 # save the colors you've chosen in a json file
 butt_saveColorPreset = tk.Button(master=overlayFrame, text="save color preset", command=saveColorPreset)
-butt_saveColorPreset.grid(row=4, column=0)
+butt_saveColorPreset.grid(row=5, column=0)
 
 # button to delete the selected color preset
 butt_deleteColorPreset = tk.Button(master=overlayFrame, text="delete color preset", command=deleteColorPreset)
-butt_deleteColorPreset.grid(row=5, column=0)
+butt_deleteColorPreset.grid(row=6, column=0)
 
 # datatype of menu text
 dropSelected_colorPalletPresets = tk.StringVar()
@@ -588,8 +589,8 @@ dropSelected_colorPalletPresets = tk.StringVar()
 # initial menu text
 dropSelected_colorPalletPresets.set("--select a preset--")
 
-drop_colorPresets = ttk.OptionMenu(overlayFrame, dropSelected_colorPalletPresets, *getColorPresetNames(), command=loadColorPreset)
-drop_colorPresets.grid(row=5, column=1)
+drop_colorPresets = ttk.OptionMenu(overlayFrame, dropSelected_colorPalletPresets, "--select a preset--", *getColorPresetNames(), command=loadColorPreset)
+drop_colorPresets.grid(row=70, column=1)
 
 # generates a mandala
 butt_startGeneration = tk.Button(master=overlayFrame, command=myApp, text="start generation")

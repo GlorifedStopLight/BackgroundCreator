@@ -278,7 +278,7 @@ class DragDropListbox(tk.Listbox):
             x = self.get(i)
             self.delete(i)
             self.insert(i-1, x)
-            self.itemconfig(i - 1, {"bg": x, "selectbackground": x})
+            self.itemconfig(i-1, {"bg": rgb_to_hex(x), "selectbackground": rgb_to_hex(x), "fg": rgb_to_hex(x), "selectforeground": rgb_to_hex(invertRGBValues(x))})
             self.curIndex = i
 
 

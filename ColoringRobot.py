@@ -4,11 +4,13 @@ from math import *
 from threading import Thread
 import json
 from tkinter.colorchooser import askcolor
-from tkinter import ttk
+# from tkinter import ttk
 import time
 from tkinter import messagebox
 import multiprocessing as mp
 from tkinter import colorchooser
+import ttkbootstrap as ttk
+from ttkbootstrap.constants import *
 
 
 def normal_round(n):
@@ -311,7 +313,7 @@ def addColorToColorPallet():
     selectedColor = askcolor(title="Tkinter Color Chooser")
     rgbValue = (floor(selectedColor[0][0]), floor(selectedColor[0][1]), floor(selectedColor[0][2]))
     listbox_colorPallet.insert("end", rgbValue)
-    listbox_colorPallet.itemconfig("end", {"bg": selectedColor[1], "selectbackground": selectedColor[1], "fg": selectedColor[1]})
+    listbox_colorPallet.itemconfig("end", {"bg": selectedColor[1], "selectbackground": selectedColor[1], "fg": selectedColor[1], "selectforeground": rgb_to_hex(invertRGBValues(rgbValue))})
 
 
 def removeSelectedColorFromColorPallet():
@@ -372,6 +374,10 @@ def getColorPresetNames():
         return allColorPresetNames
 
 
+def invertRGBValues(rgb):
+    return 255-rgb[0], 255-rgb[1], 255-rgb[2]
+
+
 def loadColorPreset(event):
 
     # open save data
@@ -401,7 +407,7 @@ def loadColorPreset(event):
         for color in loadedColors:
 
             listbox_colorPallet.insert("end", color)
-            listbox_colorPallet.itemconfig("end", {"bg": rgb_to_hex(color), "selectbackground": rgb_to_hex(color)})
+            listbox_colorPallet.itemconfig("end", {"bg": rgb_to_hex(color), "selectbackground": rgb_to_hex(color), "fg": rgb_to_hex(color), "selectforeground": rgb_to_hex(invertRGBValues(color))})
 
 
 def getPresetColors(presetName):
@@ -534,59 +540,50 @@ for i in range(width + 1):
 # pick a random seed
 randomSeed = randint(0, 1000000000)
 
-win = tk.Tk()
-overlayFrame = tk.Frame(master=win, bd=30)
+win = ttk.Window(themename="cosmo")
+overlayFrame = ttk.Frame(master=win)
 overlayFrame.grid(row=0, column=0)
 
 # list of colors
 listbox_colorPallet = DragDropListbox(master=win)
 listbox_colorPallet.grid(row=7, column=0)
-listbox_colorPallet.config(selectborderwidth=5, relief=tk.SUNKEN, exportselection=False, activestyle=tk.UNDERLINE, width=15, height=9)
 
 # gets the desired seed to save
-entry_seedInput = tk.Entry(master=overlayFrame, width=30, bg="#d1d1d1", bd=5)
+entry_seedInput = ttk.Entry(master=overlayFrame, width=30)
 entry_seedInput.grid(row=2, column=0)
 entry_seedInput.insert(0, str(randomSeed))
 
-#
-#seedInputLabel = tk.Label(master=overlayFrame, text="input your seed below")
-#seedInputLabel.grid(row=1, column=0)
-
 # gets the name for the seed
-seedNameInput = tk.Entry(master=overlayFrame, width=30, bg="#d1d1d1", bd=5)
+seedNameInput = ttk.Entry(master=overlayFrame, width=30)
 seedNameInput.grid(row=4, column=0)
 seedNameInput.insert(0, "input your seed name here")
 
-#
-#seedNameInputLabel = tk.Label(master=overlayFrame, text="input your seed name below")
-#seedNameInputLabel.grid(row=3, column=0)
-
 # save seed
-butt_saveSeed = tk.Button(master=overlayFrame, text="Save Seed", command=saveUserGivenSeed)
+butt_saveSeed = ttk.Button(master=overlayFrame, text="Save Seed", command=saveUserGivenSeed)
 butt_saveSeed.grid(row=0, column=0)
 
 # add color
-butt_chooseColor = tk.Button(master=overlayFrame, text="choose color", command=addColorToColorPallet)
+butt_chooseColor = ttk.Button(master=overlayFrame, text="choose color", command=addColorToColorPallet)
 butt_chooseColor.grid(row=5, column=2)
 
 # button to remove color
-butt_removeColor = tk.Button(master=overlayFrame, text="Remove Selected Color", command=removeSelectedColorFromColorPallet)
+butt_removeColor = ttk.Button(master=overlayFrame, text="Remove Selected Color", command=removeSelectedColorFromColorPallet)
 butt_removeColor.grid(row=7, column=2)
 
 # gets the name for the seed
-entry_colorPresetName = tk.Entry(master=overlayFrame, width=50)
+entry_colorPresetName = ttk.Entry(master=overlayFrame, width=50)
 entry_colorPresetName.grid(row=3, column=3)
 
 # save the colors you've chosen in a json file
-butt_saveColorPreset = tk.Button(master=overlayFrame, text="save color preset", command=saveColorPreset)
+butt_saveColorPreset = ttk.Button(master=overlayFrame, text="save color preset", command=saveColorPreset)
 butt_saveColorPreset.grid(row=5, column=0)
 
 # button to delete the selected color preset
-butt_deleteColorPreset = tk.Button(master=overlayFrame, text="delete color preset", command=deleteColorPreset)
+butt_deleteColorPreset = ttk.Button(master=overlayFrame, text="delete color preset", command=deleteColorPreset)
 butt_deleteColorPreset.grid(row=6, column=0)
 
 # datatype of menu text
-dropSelected_colorPalletPresets = tk.StringVar()
+dropSelected_colorPalletPresets = ttk.StringVar()
 
 # initial menu text
 dropSelected_colorPalletPresets.set("--select a preset--")
@@ -595,34 +592,18 @@ drop_colorPresets = ttk.OptionMenu(overlayFrame, dropSelected_colorPalletPresets
 drop_colorPresets.grid(row=70, column=1)
 
 # generates a mandala
-butt_startGeneration = tk.Button(master=overlayFrame, command=myApp, text="start generation")
+butt_startGeneration = ttk.Button(master=overlayFrame, command=myApp, text="start generation")
 butt_startGeneration.grid(row=10, column=0)
 
 # create and show the frame
-frame = tk.Frame(win, width=width, height=height)
+frame = ttk.Frame(win, width=width, height=height)
 
 # create a canvas for the frame
-canvas_mandala = tk.Canvas(master=frame, bg='#FFFFFF', width=width, height=height, scrollregion=(0, 0, 500, 500))
+canvas_mandala = ttk.Canvas(master=frame, bg='#FFFFFF', width=width, height=height, scrollregion=(0, 0, 500, 500))
 canvas_mandala.pack()
 
-# create horizontal and vertical scroll bars
-hbar = tk.Scrollbar(frame, orient=tk.HORIZONTAL)
-vbar = tk.Scrollbar(frame, orient=tk.VERTICAL)
-
-# show these scroll bars
-hbar.pack(side=tk.BOTTOM, fill=tk.X)
-vbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-# configure the scroll bars to move the canvas left right up and down
-hbar.config(command=canvas_mandala.xview)
-vbar.config(command=canvas_mandala.yview)
-
-# do the same to canvas
-canvas_mandala.config(width=width, height=height)
-canvas_mandala.config(xscrollcommand=hbar.set, yscrollcommand=vbar.set)
-
 # show canvas in frame
-canvas_mandala.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
+canvas_mandala.pack(side=ttk.LEFT, expand=True, fill=ttk.BOTH)
 
 showEvery = 100
 

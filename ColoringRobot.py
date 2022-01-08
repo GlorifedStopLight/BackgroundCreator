@@ -494,7 +494,16 @@ def deleteColorPreset():
 #
 class myApp:
     def __init__(self):
-        seed(entry_seedInput.get())
+        chosenSeed = entry_seedInput.get()
+        try:
+            chosenSeed = int(chosenSeed)
+
+        except ValueError:
+
+            messagebox.showerror(title="Seed Error", message="can only use characters 0 through 9 for the seed")
+            return
+
+        seed(chosenSeed)
         self.myControl = ControlAll(getCurrentColorPalletColors(), .5, 3, True)
         #self.myControl2 = ControlAll(getCurrentColors(), .5, 1, True, [0, 0])
 

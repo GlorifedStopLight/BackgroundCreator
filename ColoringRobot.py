@@ -308,9 +308,10 @@ def saveUserGivenSeed():
 
 
 def addColorToColorPallet():
-    myColors.append(askcolor(title="Tkinter Color Chooser")[0])
-    listbox_colorPallet.insert("end", myColors[-1])
-    listbox_colorPallet.itemconfig("end", {"bg": myColors[-1], "selectbackground": myColors[-1]})
+    selectedColor = askcolor(title="Tkinter Color Chooser")
+    rgbValue = (floor(selectedColor[0][0]), floor(selectedColor[0][1]), floor(selectedColor[0][2]))
+    listbox_colorPallet.insert("end", rgbValue)
+    listbox_colorPallet.itemconfig("end", {"bg": selectedColor[1], "selectbackground": selectedColor[1], "fg": selectedColor[1]})
 
 
 def removeSelectedColorFromColorPallet():
@@ -493,7 +494,7 @@ def deleteColorPreset():
 #
 class myApp:
     def __init__(self):
-
+        seed(entry_seedInput.get())
         self.myControl = ControlAll(getCurrentColorPalletColors(), .5, 3, True)
         #self.myControl2 = ControlAll(getCurrentColors(), .5, 1, True, [0, 0])
 
@@ -521,17 +522,8 @@ for i in range(width + 1):
 
     circleMatrix.append(tempList.copy())
 
-userPickedSeed = input("input a seed leave blank for random seed: ")
-
-if userPickedSeed == "":
-    userPickedSeed = randint(0, 1000000000)
-    print(userPickedSeed)
-else:
-    userPickedSeed = int(userPickedSeed)
-
-seed(userPickedSeed)
-
-myColors = []
+# pick a random seed
+randomSeed = randint(0, 1000000000)
 
 win = tk.Tk()
 overlayFrame = tk.Frame(master=win, bd=30)
@@ -543,21 +535,22 @@ listbox_colorPallet.grid(row=7, column=0)
 listbox_colorPallet.config(selectborderwidth=5, relief=tk.SUNKEN, exportselection=False, activestyle=tk.UNDERLINE, width=15, height=9)
 
 # gets the desired seed to save
-entry_seedInput = tk.Entry(master=overlayFrame, width=50)
+entry_seedInput = tk.Entry(master=overlayFrame, width=30, bg="#d1d1d1", bd=5)
 entry_seedInput.grid(row=2, column=0)
+entry_seedInput.insert(0, str(randomSeed))
 
 #
-seedInputLabel = tk.Label(master=overlayFrame, text="input your seed below")
-seedInputLabel.grid(row=1, column=0)
+#seedInputLabel = tk.Label(master=overlayFrame, text="input your seed below")
+#seedInputLabel.grid(row=1, column=0)
 
 # gets the name for the seed
-seedNameInput = tk.Entry(master=overlayFrame, width=50)
+seedNameInput = tk.Entry(master=overlayFrame, width=30, bg="#d1d1d1", bd=5)
 seedNameInput.grid(row=4, column=0)
-seedNameInput.insert(0, "input your seed name below")
+seedNameInput.insert(0, "input your seed name here")
 
 #
-seedNameInputLabel = tk.Label(master=overlayFrame, text="input your seed name below")
-seedNameInputLabel.grid(row=3, column=0)
+#seedNameInputLabel = tk.Label(master=overlayFrame, text="input your seed name below")
+#seedNameInputLabel.grid(row=3, column=0)
 
 # save seed
 butt_saveSeed = tk.Button(master=overlayFrame, text="Save Seed", command=saveUserGivenSeed)

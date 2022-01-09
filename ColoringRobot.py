@@ -546,7 +546,7 @@ overlayFrame.grid(row=0, column=0)
 
 # list of colors
 listbox_colorPallet = DragDropListbox(master=win)
-listbox_colorPallet.grid(row=7, column=0)
+listbox_colorPallet.grid(row=1, column=3)
 
 # gets the desired seed to save
 entry_seedInput = ttk.Entry(master=overlayFrame, width=30)
@@ -562,16 +562,23 @@ seedNameInput.insert(0, "input your seed name here")
 butt_saveSeed = ttk.Button(master=overlayFrame, text="Save Seed", command=saveUserGivenSeed)
 butt_saveSeed.grid(row=0, column=0)
 
+label_colorSpeed = ttk.Label(master=overlayFrame, text="color speed")
+label_colorSpeed.grid(row=0, column=1)
+
+entry_colorSpeed = ttk.Entry(master=overlayFrame, width=5)
+entry_colorSpeed.grid(row=0, column=2)
+entry_colorSpeed.insert(0, "0.3")
+
 # add color
 butt_chooseColor = ttk.Button(master=overlayFrame, text="choose color", command=addColorToColorPallet)
-butt_chooseColor.grid(row=5, column=2)
+butt_chooseColor.grid(row=2, column=4)
 
 # button to remove color
 butt_removeColor = ttk.Button(master=overlayFrame, text="Remove Selected Color", command=removeSelectedColorFromColorPallet)
-butt_removeColor.grid(row=7, column=2)
+butt_removeColor.grid(row=2, column=5)
 
 # gets the name for the seed
-entry_colorPresetName = ttk.Entry(master=overlayFrame, width=50)
+entry_colorPresetName = ttk.Entry(master=overlayFrame, width=20)
 entry_colorPresetName.grid(row=3, column=3)
 
 # save the colors you've chosen in a json file
@@ -589,11 +596,11 @@ dropSelected_colorPalletPresets = ttk.StringVar()
 dropSelected_colorPalletPresets.set("--select a preset--")
 
 drop_colorPresets = ttk.OptionMenu(overlayFrame, dropSelected_colorPalletPresets, "--select a preset--", *getColorPresetNames(), command=loadColorPreset)
-drop_colorPresets.grid(row=70, column=1)
+drop_colorPresets.grid(row=0, column=4)
 
 # generates a mandala
 butt_startGeneration = ttk.Button(master=overlayFrame, command=myApp, text="start generation")
-butt_startGeneration.grid(row=10, column=0)
+butt_startGeneration.grid(row=10, column=6)
 
 # create and show the frame
 frame = ttk.Frame(win, width=width, height=height)

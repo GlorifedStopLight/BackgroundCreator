@@ -4,13 +4,14 @@ from math import *
 from threading import Thread
 import json
 from tkinter.colorchooser import askcolor
-# from tkinter import ttk
 import time
 from tkinter import messagebox
 import multiprocessing as mp
 from tkinter import colorchooser
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
+from tkinter import simpledialog
+
 
 
 def normal_round(n):
@@ -289,8 +290,9 @@ def hex_to_rgb(value):
 
 
 def saveUserGivenSeed():
+    seedName = simpledialog.askstring(title="Test", prompt="What's your Name?:")
 
-    if entry_seedName.get() == "" or entry_seedInput.get() == "":
+    if seedName == "" or entry_seedInput.get() == "":
         return
 
     with open("mySavedData.json") as outfile:
@@ -299,7 +301,7 @@ def saveUserGivenSeed():
         info = json.load(outfile)
 
         # add another seed
-        info["savedSeeds"][entry_seedName.get()] = entry_seedInput.get()
+        info["savedSeeds"][seedName] = entry_seedInput.get()
 
         json_object = json.dumps(info, indent=4)
 
@@ -323,7 +325,9 @@ def removeSelectedColorFromColorPallet():
 def saveColorPreset():
     global drop_colorPresets
 
-    if entry_colorPresetName.get() == "":
+    colorPresetName = simpledialog.askstring(title="Save Color Preset", prompt="Enter the name of your new color preset:")
+
+    if colorPresetName == "":
         print("no given name for preset")
         return
 
@@ -339,10 +343,10 @@ def saveColorPreset():
         for i in range(listbox_colorPallet.size()):
 
             # add the name to the list (the name is a color)
-            presetColors.append(hex_to_rgb(listbox_colorPallet.get(i)))
+            presetColors.append(listbox_colorPallet.get(i))
 
         # create a new color preset
-        info["savedColors"][entry_colorPresetName.get()] = presetColors
+        info["savedColors"][colorPresetName] = presetColors
 
         # create a json object
         json_object = json.dumps(info, indent=4)
@@ -395,6 +399,8 @@ def loadColorPreset(event):
 
         # preset name doesn't exist
         except KeyError:
+
+            print("preset name does not exist")
 
             # give up
             return
@@ -490,11 +496,19 @@ def deleteColorPreset():
 
             json_object = json.dumps(savedData, indent=4)
             outfile.write(json_object)
-    """
-    options = list(drop_colorPresets['values'])
-    options.remove(presetName)
-    drop_colorPresets['values'] = options
-    """
+
+    # update color preset drop down menu
+    menu = drop_colorPresets["menu"]
+    menu.delete(0, "end")
+    for string in getColorPresetNames():
+        menu.add_command(label=string,
+                         command=lambda value=string: dropSelected_colorPalletPresets.set(value))
+
+    # at least one color preset still exists
+    if getColorPresetNames():
+
+        # set the selected item in the drop down menu to the first item in the menu
+        dropSelected_colorPalletPresets.set("--select a preset--")
 
 
 #
@@ -540,17 +554,22 @@ for i in range(width + 1):
 # pick a random seed
 randomSeed = randint(0, 1000000000)
 
-win = ttk.Window(themename="cosmo")
+win = ttk.Window(themename="yeti")
 overlayFrame = ttk.Frame(master=win)
-overlayFrame.grid(row=0, column=0)
+overlayFrame.grid(row=0, column=0, padx=30, pady=30)
+
+# holds widgets that control the colors
+frame_colors = ttk.Frame(master=overlayFrame)
+frame_colors.grid(row=0, column=3)
 
 # list of colors
-listbox_colorPallet = DragDropListbox(master=overlayFrame)
+listbox_colorPallet = DragDropListbox(master=frame_colors)
+listbox_colorPallet.bind('<FocusOut>', lambda e: listbox_colorPallet.selection_clear(0, END))
 listbox_colorPallet.grid(row=1, column=4)
 
 # gets the desired seed to save
 entry_seedInput = ttk.Entry(master=overlayFrame, width=30)
-entry_seedInput.grid(row=2, column=0)
+entry_seedInput.grid(row=1, column=0)
 entry_seedInput.insert(0, str(randomSeed))
 
 # gets the name for the seed
@@ -559,7 +578,8 @@ entry_seedName.grid(row=4, column=0)
 entry_seedName.insert(0, "input your seed name here")
 
 # save seed
-butt_saveSeed = ttk.Button(master=overlayFrame, text="Save Seed", command=saveUserGivenSeed)
+butt_saveSeed = ttk.Button(master=overlayFrame, text="Save Seed", command=saveUserGivenSeed, style="success")
+
 butt_saveSeed.grid(row=0, column=0)
 
 label_colorSpeed = ttk.Label(master=overlayFrame, text="color speed")
@@ -570,23 +590,24 @@ entry_colorSpeed.grid(row=0, column=2)
 entry_colorSpeed.insert(0, "0.3")
 
 # add color
-butt_chooseColor = ttk.Button(master=overlayFrame, text="+", command=addColorToColorPallet)
+butt_chooseColor = ttk.Button(master=frame_colors, text="+", command=addColorToColorPallet)
 butt_chooseColor.grid(row=2, column=4, sticky="W")
 
 # button to remove color
-butt_removeColor = ttk.Button(master=overlayFrame, text="-", command=removeSelectedColorFromColorPallet)
+butt_removeColor = ttk.Button(master=frame_colors, text="-", command=removeSelectedColorFromColorPallet)
 butt_removeColor.grid(row=2, column=4, sticky="E")
 
 # gets the name for the seed
-entry_colorPresetName = ttk.Entry(master=overlayFrame, width=20)
-entry_colorPresetName.grid(row=3, column=3)
+entry_colorPresetName = ttk.Entry(master=frame_colors, width=20)
+entry_colorPresetName.grid(row=5, column=4)
+entry_colorPresetName.insert(0, "--enter color preset name--")
 
 # save the colors you've chosen in a json file
-butt_saveColorPreset = ttk.Button(master=overlayFrame, text="save color preset", command=saveColorPreset)
-butt_saveColorPreset.grid(row=5, column=0)
+butt_saveColorPreset = ttk.Button(master=frame_colors, text="save color preset", command=saveColorPreset, style="success")
+butt_saveColorPreset.grid(row=3, column=4)
 
 # button to delete the selected color preset
-butt_deleteColorPreset = ttk.Button(master=overlayFrame, text="delete color preset", command=deleteColorPreset)
+butt_deleteColorPreset = ttk.Button(master=frame_colors, text="delete color preset", command=deleteColorPreset, style="danger")
 butt_deleteColorPreset.grid(row=6, column=0)
 
 # datatype of menu text
@@ -595,7 +616,7 @@ dropSelected_colorPalletPresets = ttk.StringVar()
 # initial menu text
 dropSelected_colorPalletPresets.set("--select a preset--")
 
-drop_colorPresets = ttk.OptionMenu(overlayFrame, dropSelected_colorPalletPresets, "--select a preset--", *getColorPresetNames(), command=loadColorPreset)
+drop_colorPresets = ttk.OptionMenu(frame_colors, dropSelected_colorPalletPresets, "--select a preset--", *getColorPresetNames(), command=loadColorPreset)
 drop_colorPresets.grid(row=0, column=4)
 
 # generates a mandala

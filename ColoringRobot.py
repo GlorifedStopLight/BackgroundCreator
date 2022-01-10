@@ -290,7 +290,7 @@ def hex_to_rgb(value):
 
 def saveUserGivenSeed():
 
-    if seedNameInput.get() == "" or entry_seedInput.get() == "":
+    if entry_seedName.get() == "" or entry_seedInput.get() == "":
         return
 
     with open("mySavedData.json") as outfile:
@@ -299,7 +299,7 @@ def saveUserGivenSeed():
         info = json.load(outfile)
 
         # add another seed
-        info["savedSeeds"][seedNameInput.get()] = entry_seedInput.get()
+        info["savedSeeds"][entry_seedName.get()] = entry_seedInput.get()
 
         json_object = json.dumps(info, indent=4)
 
@@ -545,8 +545,8 @@ overlayFrame = ttk.Frame(master=win)
 overlayFrame.grid(row=0, column=0)
 
 # list of colors
-listbox_colorPallet = DragDropListbox(master=win)
-listbox_colorPallet.grid(row=1, column=3)
+listbox_colorPallet = DragDropListbox(master=overlayFrame)
+listbox_colorPallet.grid(row=1, column=4)
 
 # gets the desired seed to save
 entry_seedInput = ttk.Entry(master=overlayFrame, width=30)
@@ -554,9 +554,9 @@ entry_seedInput.grid(row=2, column=0)
 entry_seedInput.insert(0, str(randomSeed))
 
 # gets the name for the seed
-seedNameInput = ttk.Entry(master=overlayFrame, width=30)
-seedNameInput.grid(row=4, column=0)
-seedNameInput.insert(0, "input your seed name here")
+entry_seedName = ttk.Entry(master=overlayFrame, width=30)
+entry_seedName.grid(row=4, column=0)
+entry_seedName.insert(0, "input your seed name here")
 
 # save seed
 butt_saveSeed = ttk.Button(master=overlayFrame, text="Save Seed", command=saveUserGivenSeed)
@@ -570,11 +570,11 @@ entry_colorSpeed.grid(row=0, column=2)
 entry_colorSpeed.insert(0, "0.3")
 
 # add color
-butt_chooseColor = ttk.Button(master=overlayFrame, text="choose color", command=addColorToColorPallet)
+butt_chooseColor = ttk.Button(master=overlayFrame, text="+", command=addColorToColorPallet)
 butt_chooseColor.grid(row=2, column=4)
 
 # button to remove color
-butt_removeColor = ttk.Button(master=overlayFrame, text="Remove Selected Color", command=removeSelectedColorFromColorPallet)
+butt_removeColor = ttk.Button(master=overlayFrame, text="-", command=removeSelectedColorFromColorPallet)
 butt_removeColor.grid(row=2, column=5)
 
 # gets the name for the seed

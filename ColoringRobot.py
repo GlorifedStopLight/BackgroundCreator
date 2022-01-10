@@ -571,11 +571,11 @@ entry_colorSpeed.insert(0, "0.3")
 
 # add color
 butt_chooseColor = ttk.Button(master=overlayFrame, text="+", command=addColorToColorPallet)
-butt_chooseColor.grid(row=2, column=4)
+butt_chooseColor.grid(row=2, column=4, sticky="W")
 
 # button to remove color
 butt_removeColor = ttk.Button(master=overlayFrame, text="-", command=removeSelectedColorFromColorPallet)
-butt_removeColor.grid(row=2, column=5)
+butt_removeColor.grid(row=2, column=4, sticky="E")
 
 # gets the name for the seed
 entry_colorPresetName = ttk.Entry(master=overlayFrame, width=20)

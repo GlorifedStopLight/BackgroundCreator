@@ -13,7 +13,6 @@ from ttkbootstrap.constants import *
 from tkinter import simpledialog
 
 
-
 def normal_round(n):
     if n - floor(n) < 0.5:
         return floor(n)
@@ -544,6 +543,16 @@ class myApp:
             #self.myControl2.updateAllThings()
 
 
+def addRandomColor():
+    rgbValue = (randint(0, 255), randint(0, 255), randint(0, 255))
+
+    selectedColor = rgb_to_hex(rgbValue)
+
+    listbox_colorPallet.insert("end", rgbValue)
+    listbox_colorPallet.itemconfig("end", {"bg": selectedColor, "selectbackground": selectedColor,
+                                           "fg": selectedColor,
+                                           "selectforeground": rgb_to_hex(invertRGBValues(rgbValue))})
+
 # 1366
 width = 1366
 
@@ -610,6 +619,9 @@ butt_chooseColor.grid(row=2, column=0, sticky="W", pady=5)
 # button to remove color
 butt_removeColor = ttk.Button(master=frame_colors, text="-", command=removeSelectedColorFromColorPallet)
 butt_removeColor.grid(row=2, column=0, sticky="E", pady=5)
+
+butt_randomColor = ttk.Button(master=frame_colors, text="rand", command=addRandomColor)
+butt_randomColor.grid(row=2, column=0)
 
 # save the colors you've chosen in a json file
 butt_saveColorPreset = ttk.Button(master=frame_colors, text="save color preset", command=saveColorPreset, style="success")

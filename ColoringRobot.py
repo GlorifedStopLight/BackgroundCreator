@@ -356,8 +356,6 @@ def saveColorPreset():
 
         outfile.write(json_object)
 
-    print("")
-
     """
     menu = drop_colorPresets["menu"]
     menu.delete(0, "end")
@@ -365,7 +363,6 @@ def saveColorPreset():
         menu.add_command(label=string,
                          command=lambda value=string: dropSelected_colorPalletPresets.set(value))
     """
-
 
 # returns a list of strings which are the names of saved color presets
 def getColorPresetNames():
@@ -387,7 +384,7 @@ def invertRGBValues(rgb):
 
 
 def loadColorPreset(event):
-
+    print("loading color preset")
     # open save data
     with open("mySavedData.json") as outfile:
 
@@ -500,19 +497,25 @@ def deleteColorPreset():
 
             json_object = json.dumps(savedData, indent=4)
             outfile.write(json_object)
-
+    """
+    print()
     # update color preset drop down menu
     menu = drop_colorPresets["menu"]
+    print("type menu is", type(menu))
+    print("menu: ", menu)
     menu.delete(0, "end")
+    print("menu: ", menu)
     for string in getColorPresetNames():
         menu.add_command(label=string,
                          command=lambda value=string: dropSelected_colorPalletPresets.set(value))
-
+    print("menu: ", menu)
+    
+    """
     # at least one color preset still exists
-    if getColorPresetNames():
+    #if getColorPresetNames():
 
         # set the selected item in the drop down menu to the first item in the menu
-        dropSelected_colorPalletPresets.set("--select a preset--")
+        #dropSelected_colorPalletPresets.set(getColorPresetNames()[0])
 
 
 #
@@ -616,9 +619,6 @@ butt_deleteColorPreset.grid(row=6, column=0)
 
 # datatype of menu text
 dropSelected_colorPalletPresets = ttk.StringVar()
-
-# initial menu text
-dropSelected_colorPalletPresets.set("--select a preset--")
 
 drop_colorPresets = ttk.OptionMenu(frame_colors, dropSelected_colorPalletPresets, "--select a preset--", *getColorPresetNames(), command=loadColorPreset)
 drop_colorPresets.grid(row=0, column=4)

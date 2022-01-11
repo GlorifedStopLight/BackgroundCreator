@@ -356,11 +356,15 @@ def saveColorPreset():
 
         outfile.write(json_object)
 
+    print("")
+
+    """
     menu = drop_colorPresets["menu"]
     menu.delete(0, "end")
     for string in getColorPresetNames():
         menu.add_command(label=string,
                          command=lambda value=string: dropSelected_colorPalletPresets.set(value))
+    """
 
 
 # returns a list of strings which are the names of saved color presets
@@ -535,6 +539,7 @@ class myApp:
             self.myControl.updateAllThings()
             #self.myControl2.updateAllThings()
 
+
 # 1366
 width = 1366
 
@@ -564,7 +569,6 @@ frame_colors.grid(row=0, column=3)
 
 # list of colors
 listbox_colorPallet = DragDropListbox(master=frame_colors)
-listbox_colorPallet.bind('<FocusOut>', lambda e: listbox_colorPallet.selection_clear(0, END))
 listbox_colorPallet.grid(row=1, column=4)
 
 # gets the desired seed to save

@@ -532,7 +532,7 @@ class myApp:
             return
 
         seed(chosenSeed)
-        self.myControl = ControlAll(getCurrentColorPalletColors(), .5, 3, True)
+        self.myControl = ControlAll(getCurrentColorPalletColors(), float(entry_colorSpeed.get()), int(entry_branchCount.get()), True)
         #self.myControl2 = ControlAll(getCurrentColors(), .5, 1, True, [0, 0])
 
         myThreadCool = Thread(target=self.generationLoop)
@@ -567,51 +567,63 @@ win = ttk.Window(themename="yeti")
 overlayFrame = ttk.Frame(master=win)
 overlayFrame.grid(row=0, column=0, padx=30, pady=30)
 
+# holds miscellaneous settings widgets
+frame_settings = ttk.Frame(master=overlayFrame)
+frame_settings.grid(row=0, column=2, padx=20)
+
 # holds widgets that control the colors
 frame_colors = ttk.Frame(master=overlayFrame)
-frame_colors.grid(row=0, column=3)
+frame_colors.grid(row=0, column=3, padx=20)
 
 # list of colors
 listbox_colorPallet = DragDropListbox(master=frame_colors)
-listbox_colorPallet.grid(row=1, column=4)
+listbox_colorPallet.grid(row=1, column=0)
 
 # gets the desired seed to save
 entry_seedInput = ttk.Entry(master=overlayFrame, width=30)
-entry_seedInput.grid(row=1, column=0)
+entry_seedInput.grid(row=0, column=0)
 entry_seedInput.insert(0, str(randomSeed))
 
 # save seed
 butt_saveSeed = ttk.Button(master=overlayFrame, text="Save Seed", command=saveSeed, style="success")
-butt_saveSeed.grid(row=0, column=0)
+butt_saveSeed.grid(row=1, column=0)
 
-label_colorSpeed = ttk.Label(master=overlayFrame, text="color speed")
-label_colorSpeed.grid(row=0, column=1)
+label_colorSpeed = ttk.Label(master=frame_settings, text="color speed")
+label_colorSpeed.grid(row=0, column=0)
 
-entry_colorSpeed = ttk.Entry(master=overlayFrame, width=5)
-entry_colorSpeed.grid(row=0, column=2)
+entry_colorSpeed = ttk.Entry(master=frame_settings, width=5)
+entry_colorSpeed.grid(row=0, column=1)
 entry_colorSpeed.insert(0, "0.3")
+
+label_branchCount = ttk.Label(master=frame_settings, text="branch Count")
+label_branchCount.grid(row=1, column=0)
+
+entry_branchCount = ttk.Entry(master=frame_settings, width=5)
+entry_branchCount.grid(row=1, column=1)
+entry_branchCount.insert(0, "4")
+
 
 # add color
 butt_chooseColor = ttk.Button(master=frame_colors, text="+", command=addColorToColorPallet)
-butt_chooseColor.grid(row=2, column=4, sticky="W")
+butt_chooseColor.grid(row=2, column=0, sticky="W", pady=5)
 
 # button to remove color
 butt_removeColor = ttk.Button(master=frame_colors, text="-", command=removeSelectedColorFromColorPallet)
-butt_removeColor.grid(row=2, column=4, sticky="E")
+butt_removeColor.grid(row=2, column=0, sticky="E", pady=5)
 
 # save the colors you've chosen in a json file
 butt_saveColorPreset = ttk.Button(master=frame_colors, text="save color preset", command=saveColorPreset, style="success")
-butt_saveColorPreset.grid(row=3, column=4)
+butt_saveColorPreset.grid(row=3, column=0, pady=5)
 
 # button to delete the selected color preset
 butt_deleteColorPreset = ttk.Button(master=frame_colors, text="delete color preset", command=deleteColorPreset, style="danger")
-butt_deleteColorPreset.grid(row=6, column=0)
+butt_deleteColorPreset.grid(row=4, column=0, pady=5)
 
 # datatype of menu text
 dropSelected_colorPalletPresets = ttk.StringVar()
 
 drop_colorPresets = ttk.OptionMenu(frame_colors, dropSelected_colorPalletPresets, "--select a preset--", *getColorPresetNames(), command=loadColorPreset)
-drop_colorPresets.grid(row=0, column=4)
+drop_colorPresets.grid(row=0, column=0, pady=5)
 
 # generates a mandala
 butt_startGeneration = ttk.Button(master=overlayFrame, command=myApp, text="start generation")

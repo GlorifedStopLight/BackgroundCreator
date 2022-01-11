@@ -21,15 +21,16 @@ def normal_round(n):
 
 class DotMaker:
 
-    def __init__(self, splitReflections, isMirrored, colorsToFadeTo, fadeSpeed, followThisDot=None, startLocation=None, moveType="random"):
+    def __init__(self, splitReflections, isMirrored, colorsToFadeTo, fadeSpeed, followThisDot=None, startLocation=None, moveType="random", angleOfTurn=90):
 
         if isMirrored:
             radianAmount = 2*pi / splitReflections / 2
         else:
             radianAmount = 2 * pi / splitReflections
 
+        self.angleOfTurn = angleOfTurn
         self.moveType = moveType
-        self.movesBeforeDirectionChangeRange = (10, 20)
+        self.movesBeforeDirectionChangeRange = (1000, 1000)
         self.changeDirectionIn = randint(self.movesBeforeDirectionChangeRange[0], self.movesBeforeDirectionChangeRange[1])
         self.slope = [s, s]
 
@@ -74,6 +75,12 @@ class DotMaker:
 
         self.feedGrace = True
 
+        if self.moveType == "random":
+            self.changeCordsThread = self.randomGen
+
+        elif self.moveType == "bouncing line":
+            self.changeCordsThread = self.bouncingLineGen
+
     def getDotCreationInfo(self):
         x = self.cords[0]
         y = self.cords[1]
@@ -98,42 +105,42 @@ class DotMaker:
             # draw dot
             drawRect(*dotInfo)
 
-    def changeCordsThread(self):
+    def randomGen(self):
 
-        if self.moveType == "random":
-            self.cords[0] = abs(abs(self.cords[0] + choice((-s, s)) - width) - width)
-            self.cords[1] = abs(abs(self.cords[1] + choice((-s, s)) - height) - height)
+        self.cords[0] = abs(abs(self.cords[0] + choice((-s, s)) - width) - width)
+        self.cords[1] = abs(abs(self.cords[1] + choice((-s, s)) - height) - height)
 
-        elif self.moveType == "bouncing line":
+    def bouncingLineGen(self):
+        # going off the right side
+        if self.cords[0] + self.slope[0] > width:
+            self.slope[0] = self.slope[0] * -1
 
-            # going off the right side
-            if self.cords[0] + self.slope[0] > width:
-                self.slope[0] = self.slope[0] * -1
+        elif self.cords[0] + self.slope[0] < 0:
+            self.slope[0] = self.slope[0] * -1
 
-            elif self.cords[0] + self.slope[0] < 0:
-                self.slope[0] = self.slope[0] * -1
+        if self.cords[1] + self.slope[1] > height:
+            self.slope[1] = self.slope[1] * -1
 
-            if self.cords[1] + self.slope[1] > height:
-                self.slope[1] = self.slope[1] * -1
+        elif self.cords[1] + self.slope[1] < 0:
+            self.slope[1] = self.slope[1] * -1
 
-            elif self.cords[1] + self.slope[1] < 0:
-                self.slope[1] = self.slope[1] * -1
+        if self.changeDirectionIn == 0:
+            newDirect = choice((-1, 1))
 
-            if self.changeDirectionIn == 0:
-                newDirect = choice((-1, 1))
-
-                if newDirect == 1:
-                    self.slope[1] *= -1
-                else:
-                    self.slope[0] *= -1
-
-                self.changeDirectionIn = randint(self.movesBeforeDirectionChangeRange[0], self.movesBeforeDirectionChangeRange[1])
-
+            if newDirect == 1:
+                self.slope[1] *= -1
             else:
-                self.changeDirectionIn -= 1
+                self.slope[0] *= -1
 
-            self.cords[0] = abs(abs(self.cords[0] + self.slope[0] - width) - width)
-            self.cords[1] = abs(abs(self.cords[1] + self.slope[1] - height) - height)
+            self.changeDirectionIn = randint(self.movesBeforeDirectionChangeRange[0],
+                                             self.movesBeforeDirectionChangeRange[1])
+
+        else:
+            self.changeDirectionIn -= 1
+
+        self.cords[0] = abs(abs(self.cords[0] + self.slope[0] - width) - width)
+        self.cords[1] = abs(abs(self.cords[1] + self.slope[1] - height) - height)
+
 
     # doesn't return anything just calculates the next color
     def getNextColor(self):
@@ -562,7 +569,7 @@ class myApp:
         self.myControl = ControlAll(colorSelection=getCurrentColorPalletColors(),
                                     colorSpeed=float(entry_colorSpeed.get()),
                                     branchNumber=int(entry_branchCount.get()),
-                                    isBranchesMirrored=False,
+                                    isBranchesMirrored=True,
                                     moveType="bouncing line")
 
         myThreadCool = Thread(target=self.generationLoop)
@@ -602,6 +609,8 @@ for i in range(width + 1):
 
 # pick a random seed
 randomSeed = randint(0, 1000000000)
+
+movementTypes = ["random", "bouncing line"]
 
 win = ttk.Window(themename="yeti")
 overlayFrame = ttk.Frame(master=win)

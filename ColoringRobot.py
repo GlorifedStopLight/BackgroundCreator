@@ -112,10 +112,10 @@ class DotMaker:
 
     def bouncingLineGen(self):
         # going off the right side
-        if 0 > self.cords[0] + self.slope[0] > width:
+        if not 0 < self.cords[0] + self.slope[0] < width:
             self.slope[0] = self.slope[0] * -1
 
-        if 0 > self.cords[1] + self.slope[1] > height:
+        if not 0 < self.cords[1] + self.slope[1] < height:
             self.slope[1] = self.slope[1] * -1
 
         if self.changeDirectionIn == 0:

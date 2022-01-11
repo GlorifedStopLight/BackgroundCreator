@@ -289,8 +289,8 @@ def hex_to_rgb(value):
     return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
 
-def saveUserGivenSeed():
-    seedName = simpledialog.askstring(title="Test", prompt="What's your Name?:")
+def saveSeed():
+    seedName = simpledialog.askstring(title="Saving Seed", prompt="Enter name for this seed: ")
 
     if seedName == "" or entry_seedInput.get() == "":
         return
@@ -363,6 +363,7 @@ def saveColorPreset():
         menu.add_command(label=string,
                          command=lambda value=string: dropSelected_colorPalletPresets.set(value))
     """
+
 
 # returns a list of strings which are the names of saved color presets
 def getColorPresetNames():
@@ -579,14 +580,8 @@ entry_seedInput = ttk.Entry(master=overlayFrame, width=30)
 entry_seedInput.grid(row=1, column=0)
 entry_seedInput.insert(0, str(randomSeed))
 
-# gets the name for the seed
-entry_seedName = ttk.Entry(master=overlayFrame, width=30)
-entry_seedName.grid(row=4, column=0)
-entry_seedName.insert(0, "input your seed name here")
-
 # save seed
-butt_saveSeed = ttk.Button(master=overlayFrame, text="Save Seed", command=saveUserGivenSeed, style="success")
-
+butt_saveSeed = ttk.Button(master=overlayFrame, text="Save Seed", command=saveSeed, style="success")
 butt_saveSeed.grid(row=0, column=0)
 
 label_colorSpeed = ttk.Label(master=overlayFrame, text="color speed")
@@ -603,11 +598,6 @@ butt_chooseColor.grid(row=2, column=4, sticky="W")
 # button to remove color
 butt_removeColor = ttk.Button(master=frame_colors, text="-", command=removeSelectedColorFromColorPallet)
 butt_removeColor.grid(row=2, column=4, sticky="E")
-
-# gets the name for the seed
-entry_colorPresetName = ttk.Entry(master=frame_colors, width=20)
-entry_colorPresetName.grid(row=5, column=4)
-entry_colorPresetName.insert(0, "--enter color preset name--")
 
 # save the colors you've chosen in a json file
 butt_saveColorPreset = ttk.Button(master=frame_colors, text="save color preset", command=saveColorPreset, style="success")

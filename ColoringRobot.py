@@ -51,20 +51,6 @@ class DotMaker:
         else:
             self.cords = startLocation
 
-        self.moveHere = [0, 0]
-        self.xDirection = self.cords[0] < self.moveHere[0]
-        self.yDirection = self.cords[1] < self.moveHere[1]
-
-        if self.xDirection:
-            self.addX = s
-        else:
-            self.addX = -s
-
-        if self.yDirection:
-            self.addY = s
-        else:
-            self.addY = -s
-
         # a list of colors that the user wants to fade to (in order)
         self.colorsToFadeTo = colorsToFadeTo
 
@@ -105,6 +91,55 @@ class DotMaker:
 
         elif self.moveType == "point by point":
             self.changeCordsThread = self.pointByPoint
+            self.moveHere = [0, 0]
+            self.xDirection = self.cords[0] < self.moveHere[0]
+            self.yDirection = self.cords[1] < self.moveHere[1]
+
+            if self.xDirection:
+                self.addX = s
+            else:
+                self.addX = -s
+
+            if self.yDirection:
+                self.addY = s
+            else:
+                self.addY = -s
+
+        elif self.moveType == "direct point by point":
+            self.changeCordsThread = self.directPointByPoint
+
+            self.moveHere = [0, 0]
+            self.xDirection = self.cords[0] < self.moveHere[0]
+            self.yDirection = self.cords[1] < self.moveHere[1]
+
+            self.m = (self.cords[0] - self.moveHere[0]), (self.cords[1] - self.moveHere[1])
+
+            if self.xDirection:
+                self.addX = -s * self.m[0] / self.m[1]
+            else:
+                self.addX = -s * self.m[0] / self.m[1]
+
+            if self.yDirection:
+                self.addY = s * self.m[1] / self.m[0]
+            else:
+                self.addY = s * self.m[1] / self.m[0]
+
+        elif self.moveType == "random point by point":
+            self.changeCordsThread = self.randomPointByPoint
+
+            self.moveHere = [0, 0]
+            self.xDirection = self.cords[0] < self.moveHere[0]
+            self.yDirection = self.cords[1] < self.moveHere[1]
+
+            if self.xDirection:
+                self.addX = s
+            else:
+                self.addX = -s
+
+            if self.yDirection:
+                self.addY = s
+            else:
+                self.addY = -s
 
     def getDotCreationInfo(self):
         x = self.cords[0]
@@ -162,6 +197,67 @@ class DotMaker:
                 self.addY = s
             else:
                 self.addY = -s
+
+    def randomPointByPoint(self):
+        conditions = [True, True]
+
+        if self.xDirection and self.cords[0] + self.addX < self.moveHere[0] or \
+                not self.xDirection and self.cords[0] + self.addX > self.moveHere[0]:
+            self.cords[0] += self.addX
+            conditions[0] = False
+
+        elif self.yDirection and self.cords[1] + self.addY < self.moveHere[1] or \
+                not self.yDirection and self.cords[1] + self.addY > self.moveHere[1]:
+            self.cords[1] += self.addY
+            conditions[1] = False
+
+        if all(conditions):
+
+            self.moveHere = [randint(0, width), randint(0, height)]
+            self.xDirection = self.cords[0] < self.moveHere[0]
+            self.yDirection = self.cords[1] < self.moveHere[1]
+
+            if self.xDirection:
+                self.addX = s
+            else:
+                self.addX = -s
+
+            if self.yDirection:
+                self.addY = s
+            else:
+                self.addY = -s
+
+    def directPointByPoint(self):
+        conditions = [True, True]
+
+        if self.xDirection and self.cords[0] + self.addX < self.moveHere[0] or \
+                not self.xDirection and self.cords[0] + self.addX > self.moveHere[0]:
+            self.cords[0] += self.addX
+            self.cords[1] = self.moveHere[1] + ((self.m[1]/self.m[0]) * (self.cords[0] - self.moveHere[0]))
+            conditions[0] = False
+        """
+        if self.yDirection and self.cords[1] + self.addY < self.moveHere[1] or \
+                not self.yDirection and self.cords[1] + self.addY > self.moveHere[1]:
+            self.cords[1] += self.addY
+            conditions[1] = False
+        """
+        if all(conditions):
+
+            self.moveHere = [randint(0, width), randint(0, height)]
+            self.xDirection = self.cords[0] < self.moveHere[0]
+            self.yDirection = self.cords[1] < self.moveHere[1]
+
+            self.m = (self.cords[0] - self.moveHere[0]), (self.cords[1] - self.moveHere[1])
+
+            if self.xDirection:
+                self.addX = s * self.m[0]/self.m[1]
+            else:
+                self.addX = s * self.m[0]/self.m[1]
+
+            if self.yDirection:
+                self.addY = -s * self.m[1]/self.m[0]
+            else:
+                self.addY = -s * self.m[1]/self.m[0]
 
     def bouncingLineGen(self):
 
@@ -473,7 +569,6 @@ def invertRGBValues(rgb):
 
 
 def loadColorPreset(event):
-    print("loading color preset")
     # open save data
     with open("mySavedData.json") as outfile:
 
@@ -581,20 +676,7 @@ def deleteColorPreset():
         with open("mySavedData.json", "w") as outfile:
             json_object = json.dumps(savedData, indent=4)
             outfile.write(json_object)
-    """
-    print()
-    # update color preset drop down menu
-    menu = drop_colorPresets["menu"]
-    print("type menu is", type(menu))
-    print("menu: ", menu)
-    menu.delete(0, "end")
-    print("menu: ", menu)
-    for string in getColorPresetNames():
-        menu.add_command(label=string,
-                         command=lambda value=string: dropSelected_colorPalletPresets.set(value))
-    print("menu: ", menu)
-    
-    """
+
     # at least one color preset still exists
     # if getColorPresetNames():
 
@@ -602,17 +684,19 @@ def deleteColorPreset():
     # dropSelected_colorPalletPresets.set(getColorPresetNames()[0])
 
 
+def returnNumberFromString(givenString):
+    letters = "0123456789abcdefghijklmnopqrstuvwxyz,./<>?;':[]{}\| _+-=)(*&^%$#@!~`"
+    numberString = ""
+    for char in givenString:
+        numberString += str(letters.index(char))
+
+    return int(numberString)
+
+
 #
 class myApp:
     def __init__(self):
-        chosenSeed = entry_seedInput.get()
-        try:
-            chosenSeed = int(chosenSeed)
-
-        except ValueError:
-
-            messagebox.showerror(title="Seed Error", message="can only use characters 0 through 9 for the seed")
-            return
+        chosenSeed = returnNumberFromString(entry_seedInput.get())
 
         if not getCurrentColorPalletColors():
             messagebox.showerror(title="Color Error", message="must have at least one color in the color pallet")
@@ -639,8 +723,13 @@ class myApp:
 
 
 def addRandomColor():
-    rgbValue = (randint(0, 255), randint(0, 255), randint(0, 255))
+    rgbValue = []
+    color = [randint(0, 255), 255, 0]
 
+    for i in range(2, -1, -1):
+        rgbValue.append(color.pop(randint(0, i)))
+
+    rgbValue = [randint(0, 255), randint(0, 255), randint(0, 255)]
     selectedColor = rgb_to_hex(rgbValue)
 
     listbox_colorPallet.insert("end", rgbValue)
@@ -668,7 +757,7 @@ for i in range(width + 1):
 # pick a random seed
 randomSeed = randint(0, 1000000000)
 
-movementTypes = ["random", "bouncing line", "point by point"]
+movementTypes = ["random", "bouncing line", "point by point", "direct point by point", "random point by point"]
 
 win = ttk.Window(themename="yeti")
 overlayFrame = ttk.Frame(master=win)

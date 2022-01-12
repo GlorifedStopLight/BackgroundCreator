@@ -21,29 +21,33 @@ def normal_round(n):
 
 class DotMaker:
 
-    def __init__(self, splitReflections, isMirrored, colorsToFadeTo, fadeSpeed, followThisDot=None, startLocation=None, moveType="random", angleOfTurn=90):
+    def __init__(self, splitReflections, isMirrored, colorsToFadeTo, fadeSpeed, followThisDot=None, startLocation=None,
+                 moveType="random", angleOfTurn=90):
 
         if isMirrored:
-            radianAmount = 2*pi / splitReflections / 2
+            radianAmount = 2 * pi / splitReflections / 2
         else:
             radianAmount = 2 * pi / splitReflections
 
         self.angleOfTurn = angleOfTurn
+        self.radianOfTurn = 2 * pi / angleOfTurn
+
         self.moveType = moveType
-        self.movesBeforeDirectionChangeRange = (1000, 1000)
-        self.changeDirectionIn = randint(self.movesBeforeDirectionChangeRange[0], self.movesBeforeDirectionChangeRange[1])
+        self.movesBeforeDirectionChangeRange = (1, 10)
+        self.changeDirectionIn = randint(self.movesBeforeDirectionChangeRange[0],
+                                         self.movesBeforeDirectionChangeRange[1])
         self.slope = [s, s]
 
         self.cosine = cos(radianAmount)
         self.sine = sin(radianAmount)
         self.splitReflections = splitReflections
-        self.center = (width//2, height//2)
+        self.center = (width // 2, height // 2)
         self.isMirrored = isMirrored
         self.drawThese = []
         self.followThisDot = followThisDot
 
         if startLocation is None:
-            self.cords = [width//2, height//2]
+            self.cords = [width // 2, height // 2]
         else:
             self.cords = startLocation
 
@@ -59,8 +63,12 @@ class DotMaker:
         # the index of the color from our list that we are going to
         self.fadeToColorIndex = 1
 
-        # the color that we are fading to
-        self.nextColor = colorsToFadeTo[1]
+        if len(colorsToFadeTo) == 1:
+            self.getNextColor = self.onlyOneColor
+            self.nextColor = self.currentColor
+        else:
+            # the color that we are fading to
+            self.nextColor = colorsToFadeTo[1]
 
         # how fast we fade from one color to the next
         self.fadeSpeed = fadeSpeed
@@ -90,18 +98,17 @@ class DotMaker:
 
             self.drawThese.append((int(x), int(y), s, s, self.currentColor))
             if self.isMirrored:
-                self.drawThese.append((int(-x+width), int(y), s, s, self.currentColor))
-                self.drawThese.append((int(x), int(-y+height), s, s, self.currentColor))
-                self.drawThese.append((int(-x+width), int(-y+height), s, s, self.currentColor))
+                self.drawThese.append((int(-x + width), int(y), s, s, self.currentColor))
+                self.drawThese.append((int(x), int(-y + height), s, s, self.currentColor))
+                self.drawThese.append((int(-x + width), int(-y + height), s, s, self.currentColor))
 
-            x, y = ((x - self.center[0]) * self.cosine - (y - self.center[1]) * self.sine + self.center[0]),\
+            x, y = ((x - self.center[0]) * self.cosine - (y - self.center[1]) * self.sine + self.center[0]), \
                    ((x - self.center[0]) * self.sine + (y - self.center[1]) * self.cosine + self.center[1])
 
     def createDot(self):
 
         # loop through all the given dots to draw
         for dotInfo in self.drawThese:
-
             # draw dot
             drawRect(*dotInfo)
 
@@ -111,6 +118,7 @@ class DotMaker:
         self.cords[1] = abs(abs(self.cords[1] + choice((-s, s)) - height) - height)
 
     def bouncingLineGen(self):
+
         # going off the right side
         if not 0 < self.cords[0] + self.slope[0] < width:
             self.slope[0] = self.slope[0] * -1
@@ -145,7 +153,8 @@ class DotMaker:
                 self.feedGrace = False
 
         # have arrived at the desired color
-        if [normal_round(self.currentColor[0]), normal_round(self.currentColor[1]), normal_round(self.currentColor[2])] == list(self.nextColor) and\
+        if [normal_round(self.currentColor[0]), normal_round(self.currentColor[1]),
+            normal_round(self.currentColor[2])] == list(self.nextColor) and \
                 self.newColorGracePeriod <= self.currentGrace:
 
             self.currentGrace = 0
@@ -181,6 +190,10 @@ class DotMaker:
 
         # return the updated current color
         return self.currentColor
+
+    # lol
+    def onlyOneColor(self):
+        pass
 
 
 # a class t
@@ -225,7 +238,8 @@ class CustomColorFade:
                 self.feedGrace = False
 
         # have arrived at the desired color
-        if [normal_round(self.currentColor[0]), normal_round(self.currentColor[1]), normal_round(self.currentColor[2])] == list(self.nextColor) and\
+        if [normal_round(self.currentColor[0]), normal_round(self.currentColor[1]),
+            normal_round(self.currentColor[2])] == list(self.nextColor) and \
                 self.newColorGracePeriod <= self.currentGrace:
 
             self.currentGrace = 0
@@ -265,11 +279,11 @@ class CustomColorFade:
 
 class ControlAll:
     def __init__(self, colorSelection, colorSpeed, branchNumber, isBranchesMirrored, moveType, startLocation=None):
-        self.dotFactoryObj = DotMaker(branchNumber, isBranchesMirrored, colorSelection, colorSpeed, startLocation=startLocation, moveType=moveType)
+        self.dotFactoryObj = DotMaker(branchNumber, isBranchesMirrored, colorSelection, colorSpeed,
+                                      startLocation=startLocation, moveType=moveType)
         toggleOverlay(None)
 
     def updateAllThings(self):
-
         getColorThread = Thread(target=self.dotFactoryObj.getNextColor)
         doDotThread = Thread(target=self.dotFactoryObj.getDotCreationInfo)
         cordsThread = Thread(target=self.dotFactoryObj.changeCordsThread)
@@ -284,6 +298,7 @@ class ControlAll:
 
 class DragDropListbox(tk.Listbox):
     """ A Tkinter listbox with drag'n'drop reordering of entries. """
+
     def __init__(self, master, **kw):
         kw['selectmode'] = tk.SINGLE
         tk.Listbox.__init__(self, master, kw)
@@ -299,14 +314,16 @@ class DragDropListbox(tk.Listbox):
         if i < self.curIndex:
             x = self.get(i)
             self.delete(i)
-            self.insert(i+1, x)
-            self.itemconfig(i+1, {"bg": rgb_to_hex(x), "selectbackground": rgb_to_hex(x), "fg": rgb_to_hex(x), "selectforeground": rgb_to_hex(invertRGBValues(x))})
+            self.insert(i + 1, x)
+            self.itemconfig(i + 1, {"bg": rgb_to_hex(x), "selectbackground": rgb_to_hex(x), "fg": rgb_to_hex(x),
+                                    "selectforeground": rgb_to_hex(invertRGBValues(x))})
             self.curIndex = i
         elif i > self.curIndex:
             x = self.get(i)
             self.delete(i)
-            self.insert(i-1, x)
-            self.itemconfig(i-1, {"bg": rgb_to_hex(x), "selectbackground": rgb_to_hex(x), "fg": rgb_to_hex(x), "selectforeground": rgb_to_hex(invertRGBValues(x))})
+            self.insert(i - 1, x)
+            self.itemconfig(i - 1, {"bg": rgb_to_hex(x), "selectbackground": rgb_to_hex(x), "fg": rgb_to_hex(x),
+                                    "selectforeground": rgb_to_hex(invertRGBValues(x))})
             self.curIndex = i
 
 
@@ -323,7 +340,6 @@ def saveSeed():
         return
 
     with open("mySavedData.json") as outfile:
-
         # load all of the current presets
         info = json.load(outfile)
 
@@ -334,7 +350,6 @@ def saveSeed():
 
     # Writing to sample.json
     with open("mySavedData.json", "w") as outfile:
-
         outfile.write(json_object)
 
 
@@ -342,7 +357,9 @@ def addColorToColorPallet():
     selectedColor = askcolor(title="Tkinter Color Chooser")
     rgbValue = (floor(selectedColor[0][0]), floor(selectedColor[0][1]), floor(selectedColor[0][2]))
     listbox_colorPallet.insert("end", rgbValue)
-    listbox_colorPallet.itemconfig("end", {"bg": selectedColor[1], "selectbackground": selectedColor[1], "fg": selectedColor[1], "selectforeground": rgb_to_hex(invertRGBValues(rgbValue))})
+    listbox_colorPallet.itemconfig("end", {"bg": selectedColor[1], "selectbackground": selectedColor[1],
+                                           "fg": selectedColor[1],
+                                           "selectforeground": rgb_to_hex(invertRGBValues(rgbValue))})
 
 
 def removeSelectedColorFromColorPallet():
@@ -352,7 +369,8 @@ def removeSelectedColorFromColorPallet():
 def saveColorPreset():
     global drop_colorPresets
 
-    colorPresetName = simpledialog.askstring(title="Save Color Preset", prompt="Enter the name of your new color preset:")
+    colorPresetName = simpledialog.askstring(title="Save Color Preset",
+                                             prompt="Enter the name of your new color preset:")
 
     if colorPresetName == "":
         print("no given name for preset")
@@ -368,7 +386,6 @@ def saveColorPreset():
 
         # loop through each line in listbox
         for i in range(listbox_colorPallet.size()):
-
             # add the name to the list (the name is a color)
             presetColors.append(listbox_colorPallet.get(i))
 
@@ -394,10 +411,8 @@ def saveColorPreset():
 
 # returns a list of strings which are the names of saved color presets
 def getColorPresetNames():
-
     # open json file (contains saved information)
     with open("mySavedData.json") as outfile:
-
         # convert the json file into a python object
         allSavedData = json.load(outfile)
 
@@ -408,7 +423,7 @@ def getColorPresetNames():
 
 
 def invertRGBValues(rgb):
-    return 255-rgb[0], 255-rgb[1], 255-rgb[2]
+    return 255 - rgb[0], 255 - rgb[1], 255 - rgb[2]
 
 
 def loadColorPreset(event):
@@ -440,16 +455,15 @@ def loadColorPreset(event):
 
         # add each color to our listbox of colors
         for color in loadedColors:
-
             listbox_colorPallet.insert("end", color)
-            listbox_colorPallet.itemconfig("end", {"bg": rgb_to_hex(color), "selectbackground": rgb_to_hex(color), "fg": rgb_to_hex(color), "selectforeground": rgb_to_hex(invertRGBValues(color))})
+            listbox_colorPallet.itemconfig("end", {"bg": rgb_to_hex(color), "selectbackground": rgb_to_hex(color),
+                                                   "fg": rgb_to_hex(color),
+                                                   "selectforeground": rgb_to_hex(invertRGBValues(color))})
 
 
 def getPresetColors(presetName):
-
     # open json file
     with open("mySavedData.json") as outfile:
-
         # load saved data as python object
         allData = json.load(outfile)
 
@@ -490,7 +504,6 @@ def rgb_to_hex(rgb):
 
 
 def drawRect(x, y, w, h, c):
-
     if 0 <= y <= height and 0 <= x <= width:
 
         # spot is empty
@@ -510,19 +523,16 @@ def drawRect(x, y, w, h, c):
 
 
 def deleteColorPreset():
-
     presetName = dropSelected_colorPalletPresets.get()
     x = messagebox.askquestion("Warning", "are you sure you would like \n to delete " + presetName + "?")
 
     if x == "yes":
-
         with open("mySavedData.json") as outfile:
             savedData = json.load(outfile)
 
             del savedData["savedColors"][presetName]
 
         with open("mySavedData.json", "w") as outfile:
-
             json_object = json.dumps(savedData, indent=4)
             outfile.write(json_object)
     """
@@ -540,10 +550,10 @@ def deleteColorPreset():
     
     """
     # at least one color preset still exists
-    #if getColorPresetNames():
+    # if getColorPresetNames():
 
-        # set the selected item in the drop down menu to the first item in the menu
-        #dropSelected_colorPalletPresets.set(getColorPresetNames()[0])
+    # set the selected item in the drop down menu to the first item in the menu
+    # dropSelected_colorPalletPresets.set(getColorPresetNames()[0])
 
 
 #
@@ -558,12 +568,21 @@ class myApp:
             messagebox.showerror(title="Seed Error", message="can only use characters 0 through 9 for the seed")
             return
 
+        if not getCurrentColorPalletColors():
+            messagebox.showerror(title="Color Error", message="must have at least one color in the color pallet")
+            return
+
+        elif len(getCurrentColorPalletColors()) == 1:
+            if not messagebox.askyesno(title="U GOOF", message="you're only using one color so you're a goof \n "
+                                                               "you may only continue if you agree that you're dumb"):
+                return
+
         seed(chosenSeed)
         self.myControl = ControlAll(colorSelection=getCurrentColorPalletColors(),
                                     colorSpeed=float(entry_colorSpeed.get()),
                                     branchNumber=int(entry_branchCount.get()),
-                                    isBranchesMirrored=True,
-                                    moveType="bouncing line")
+                                    isBranchesMirrored=checkBoxSelected_isMirrored.get(),
+                                    moveType=dropSelected_generationOptions.get())
 
         myThreadCool = Thread(target=self.generationLoop)
         myThreadCool.start()
@@ -631,19 +650,27 @@ butt_saveSeed = ttk.Button(master=overlayFrame, text="Save Seed", command=saveSe
 butt_saveSeed.grid(row=1, column=0)
 
 label_colorSpeed = ttk.Label(master=frame_settings, text="color speed")
-label_colorSpeed.grid(row=0, column=0)
+label_colorSpeed.grid(row=1, column=0)
 
 entry_colorSpeed = ttk.Entry(master=frame_settings, width=5)
-entry_colorSpeed.grid(row=0, column=1)
+entry_colorSpeed.grid(row=1, column=1)
 entry_colorSpeed.insert(0, "0.3")
 
 label_branchCount = ttk.Label(master=frame_settings, text="branch Count")
-label_branchCount.grid(row=1, column=0)
+label_branchCount.grid(row=2, column=0)
 
 entry_branchCount = ttk.Entry(master=frame_settings, width=5)
-entry_branchCount.grid(row=1, column=1)
+entry_branchCount.grid(row=2, column=1)
 entry_branchCount.insert(0, "4")
 
+checkBoxSelected_isMirrored = ttk.IntVar()
+checkBox_isMirrored = ttk.Checkbutton(master=frame_settings, text="mirrored", variable=checkBoxSelected_isMirrored)
+checkBox_isMirrored.grid(row=3, column=0)
+
+dropSelected_generationOptions = ttk.StringVar()
+drop_generationOptions = ttk.OptionMenu(frame_settings, dropSelected_generationOptions, movementTypes[0],
+                                        *movementTypes, style="secondary")
+drop_generationOptions.grid(row=0, column=0)
 
 # add color
 butt_chooseColor = ttk.Button(master=frame_colors, text="+", command=addColorToColorPallet)
@@ -657,17 +684,20 @@ butt_randomColor = ttk.Button(master=frame_colors, text="rand", command=addRando
 butt_randomColor.grid(row=2, column=0)
 
 # save the colors you've chosen in a json file
-butt_saveColorPreset = ttk.Button(master=frame_colors, text="save color preset", command=saveColorPreset, style="success")
+butt_saveColorPreset = ttk.Button(master=frame_colors, text="save color preset", command=saveColorPreset,
+                                  style="success")
 butt_saveColorPreset.grid(row=3, column=0, pady=5)
 
 # button to delete the selected color preset
-butt_deleteColorPreset = ttk.Button(master=frame_colors, text="delete color preset", command=deleteColorPreset, style="danger")
+butt_deleteColorPreset = ttk.Button(master=frame_colors, text="delete color preset", command=deleteColorPreset,
+                                    style="danger")
 butt_deleteColorPreset.grid(row=4, column=0, pady=5)
 
 # datatype of menu text
 dropSelected_colorPalletPresets = ttk.StringVar()
 
-drop_colorPresets = ttk.OptionMenu(frame_colors, dropSelected_colorPalletPresets, "--select a preset--", *getColorPresetNames(), command=loadColorPreset)
+drop_colorPresets = ttk.OptionMenu(frame_colors, dropSelected_colorPalletPresets, "--select a preset--",
+                                   *getColorPresetNames(), command=loadColorPreset)
 drop_colorPresets.grid(row=0, column=0, pady=5)
 
 # generates a mandala

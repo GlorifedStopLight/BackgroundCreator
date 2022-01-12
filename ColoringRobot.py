@@ -51,6 +51,20 @@ class DotMaker:
         else:
             self.cords = startLocation
 
+        self.moveHere = [0, 0]
+        self.xDirection = self.cords[0] < self.moveHere[0]
+        self.yDirection = self.cords[1] < self.moveHere[1]
+
+        if self.xDirection:
+            self.addX = s
+        else:
+            self.addX = -s
+
+        if self.yDirection:
+            self.addY = s
+        else:
+            self.addY = -s
+
         # a list of colors that the user wants to fade to (in order)
         self.colorsToFadeTo = colorsToFadeTo
 
@@ -89,6 +103,9 @@ class DotMaker:
         elif self.moveType == "bouncing line":
             self.changeCordsThread = self.bouncingLineGen
 
+        elif self.moveType == "point by point":
+            self.changeCordsThread = self.pointByPoint
+
     def getDotCreationInfo(self):
         x = self.cords[0]
         y = self.cords[1]
@@ -116,6 +133,35 @@ class DotMaker:
 
         self.cords[0] = abs(abs(self.cords[0] + choice((-s, s)) - width) - width)
         self.cords[1] = abs(abs(self.cords[1] + choice((-s, s)) - height) - height)
+
+    def pointByPoint(self):
+        conditions = [True, True]
+
+        if self.xDirection and self.cords[0] + self.addX < self.moveHere[0] or \
+                not self.xDirection and self.cords[0] + self.addX > self.moveHere[0]:
+            self.cords[0] += self.addX
+            conditions[0] = False
+
+        if self.yDirection and self.cords[1] + self.addY < self.moveHere[1] or \
+                not self.yDirection and self.cords[1] + self.addY > self.moveHere[1]:
+            self.cords[1] += self.addY
+            conditions[1] = False
+
+        if all(conditions):
+
+            self.moveHere = [randint(0, width), randint(0, height)]
+            self.xDirection = self.cords[0] < self.moveHere[0]
+            self.yDirection = self.cords[1] < self.moveHere[1]
+
+            if self.xDirection:
+                self.addX = s
+            else:
+                self.addX = -s
+
+            if self.yDirection:
+                self.addY = s
+            else:
+                self.addY = -s
 
     def bouncingLineGen(self):
 
@@ -622,7 +668,7 @@ for i in range(width + 1):
 # pick a random seed
 randomSeed = randint(0, 1000000000)
 
-movementTypes = ["random", "bouncing line"]
+movementTypes = ["random", "bouncing line", "point by point"]
 
 win = ttk.Window(themename="yeti")
 overlayFrame = ttk.Frame(master=win)

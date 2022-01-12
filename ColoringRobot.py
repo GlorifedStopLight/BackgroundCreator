@@ -11,6 +11,7 @@ from tkinter import colorchooser
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from tkinter import simpledialog
+from mss import mss
 
 
 def normal_round(n):
@@ -738,6 +739,12 @@ def addRandomColor():
                                            "selectforeground": rgb_to_hex(invertRGBValues(rgbValue))})
 
 
+def shot(event):
+    print("hello")
+    with mss() as sct:
+        filename = sct.shot(mon=-1, output="output.png")
+
+
 # 1366
 width = 1366
 
@@ -854,6 +861,7 @@ showEvery = 100
 overlayOn = True
 
 win.bind("<Escape>", toggleOverlay)
+win.bind("<F2>", shot)
 win.attributes('-fullscreen', True)
 
 win.mainloop()

@@ -755,7 +755,7 @@ def shot(event):
         draw = ImageDraw.Draw(img)
 
         # Creating text and font object
-        text = "github.com/GlorifedStopLight"
+        text = "github.com/mhanna3141"
         font = ImageFont.load_default()
 
         # Positioning Text
@@ -777,17 +777,17 @@ def printImage(event):
 
 # 1366
 # iphone 500
-width = 1366
+width = 500
 
 # 768
 # iphone 900
-height = 768
+height = 500
 s = 5
 
 circleMatrix = []
-for i in range(width + 1):
+for i in range(width + s):
     tempList = []
-    for j in range(height + 1):
+    for j in range(height + s):
         tempList.append(None)
 
     circleMatrix.append(tempList.copy())

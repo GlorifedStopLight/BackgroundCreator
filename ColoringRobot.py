@@ -13,7 +13,11 @@ from ttkbootstrap.constants import *
 from tkinter import simpledialog
 from mss import mss
 import os
+from PIL import Image
+
 import subprocess
+from PIL import ImageGrab
+
 
 
 def normal_round(n):
@@ -742,9 +746,10 @@ def addRandomColor():
 
 
 def shot(event):
-    print("hello")
-    with mss() as sct:
-        filename = sct.shot(mon=-1, output="output.png")
+    canvas_mandala.postscript(file="file_name.ps", colormode='color')
+
+    psimage = Image.open('file_name.ps')
+    psimage.save('file_name.png')
 
 
 def printImage(event):

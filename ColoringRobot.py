@@ -12,6 +12,8 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from tkinter import simpledialog
 from mss import mss
+import os
+import subprocess
 
 
 def normal_round(n):
@@ -745,6 +747,10 @@ def shot(event):
         filename = sct.shot(mon=-1, output="output.png")
 
 
+def printImage(event):
+    os.system("lpr -P HP_Color_LaserJet_MFP_M281fdw__DDA757_ /Users/markhanna/PycharmProjects/PrettyMaker/output.png")
+
+
 # 1366
 width = 1366
 
@@ -862,6 +868,7 @@ overlayOn = True
 
 win.bind("<Escape>", toggleOverlay)
 win.bind("<F2>", shot)
+win.bind("<p>", printImage)
 win.attributes('-fullscreen', True)
 
 win.mainloop()

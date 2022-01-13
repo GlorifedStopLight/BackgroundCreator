@@ -4,20 +4,15 @@ from math import *
 from threading import Thread
 import json
 from tkinter.colorchooser import askcolor
-import time
 from tkinter import messagebox
-import multiprocessing as mp
-from tkinter import colorchooser
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from tkinter import simpledialog
-from mss import mss
 import os
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 import subprocess
 from PIL import ImageGrab
-
 
 
 def normal_round(n):
@@ -746,22 +741,47 @@ def addRandomColor():
 
 
 def shot(event):
-    canvas_mandala.postscript(file="file_name.ps", colormode='color')
+    canvas_mandala.postscript(file="myImages/screenshot.ps", colormode='color')
 
-    psimage = Image.open('file_name.ps')
-    psimage.save('file_name.png')
+    psimage = Image.open('myImages/screenshot.ps')
+    psimage.save('myImages/screenshot.png')
+
+    if checkBoxSelected_addWaterMarkToScreenShots.get():
+
+        # Opening Image
+        img = Image.open(r'myImages/screenshot.png')
+
+        # Creating draw object
+        draw = ImageDraw.Draw(img)
+
+        # Creating text and font object
+        text = "github.com/GlorifedStopLight"
+        font = ImageFont.load_default()
+
+        # Positioning Text
+        textwidth, textheight = draw.textsize(text, font)
+
+        x = width / 2 - textwidth / 2
+        y = height - textheight - 300
+
+        # Applying text on image via draw object
+        draw.text((x, y), text, font=font)
+
+        # Saving the new image
+        img.save(r'myImages/screenshot.png')
 
 
 def printImage(event):
-    os.system("lpr -P HP_Color_LaserJet_MFP_M281fdw__DDA757_ /Users/markhanna/PycharmProjects/PrettyMaker/output.png")
+    os.system("lpr -P HP_Color_LaserJet_MFP_M281fdw__DDA757_ /Users/markhanna/PycharmProjects/PrettyMaker/file_name.png")
 
 
 # 1366
+# iphone 500
 width = 1366
 
 # 768
+# iphone 900
 height = 768
-
 s = 5
 
 circleMatrix = []
@@ -819,6 +839,10 @@ entry_branchCount.insert(0, "4")
 checkBoxSelected_isMirrored = ttk.IntVar()
 checkBox_isMirrored = ttk.Checkbutton(master=frame_settings, text="mirrored", variable=checkBoxSelected_isMirrored)
 checkBox_isMirrored.grid(row=3, column=0)
+
+checkBoxSelected_addWaterMarkToScreenShots = ttk.IntVar()
+checkBox_addWaterMarkToScreenShots = ttk.Checkbutton(master=frame_settings, text="add water mark to screenshots", variable=checkBoxSelected_addWaterMarkToScreenShots)
+checkBox_addWaterMarkToScreenShots.grid(row=4, column=0)
 
 dropSelected_generationOptions = ttk.StringVar()
 drop_generationOptions = ttk.OptionMenu(frame_settings, dropSelected_generationOptions, movementTypes[0],

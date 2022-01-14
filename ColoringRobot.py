@@ -741,10 +741,12 @@ def addRandomColor():
 
 
 def shot(event):
+    imageName = simpledialog.askstring(title="Screenshot", prompt="Enter a name for this image: ")
+
     canvas_mandala.postscript(file="myImages/screenshot.ps", colormode='color')
 
     psimage = Image.open('myImages/screenshot.ps')
-    psimage.save('myImages/screenshot.png')
+    psimage.save('myImages/' + imageName + '.png')
 
     if checkBoxSelected_addWaterMarkToScreenShots.get():
 
@@ -889,7 +891,7 @@ canvas_mandala = ttk.Canvas(master=frame, bg='#FFFFFF', width=width, height=heig
 canvas_mandala.pack()
 
 # show canvas in frame
-canvas_mandala.pack(side=ttk.LEFT, expand=True, fill=ttk.BOTH)
+canvas_mandala.pack(expand=True, fill=ttk.BOTH)
 
 showEvery = 100
 

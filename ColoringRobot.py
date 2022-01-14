@@ -9,7 +9,9 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from tkinter import simpledialog
 import os
+from os.path import exists
 from PIL import Image, ImageDraw, ImageFont
+from datetime import datetime
 
 import subprocess
 from PIL import ImageGrab
@@ -741,10 +743,23 @@ def addRandomColor():
 
 
 def shot(event):
+
+    # ask user what the image name should be
     imageName = simpledialog.askstring(title="Screenshot", prompt="Enter a name for this image: ")
 
-    canvas_mandala.postscript(file="myImages/screenshot.ps", colormode='color')
+    # check if name is already being used for a previous screenshot
+    if exists('myImages/' + imageName + '.png'):
 
+        # ask user whether or not to override old screenshot
+        overrideScreenshot = messagebox.askokcancel(title="Error: Name In Use", message=imageName + ".png already exists. Would you like to override this file?")
+
+        # user wanted to override the old screenshot
+        if not overrideScreenshot:
+            now = datetime.now()
+
+            imageName = "screenshot at " + now.strftime("%d-%m-%Y %H:%M:%S")
+
+    canvas_mandala.postscript(file="myImages/screenshot.ps", colormode='color')
     psimage = Image.open('myImages/screenshot.ps')
     psimage.save('myImages/' + imageName + '.png')
 
@@ -780,10 +795,12 @@ def printImage(event):
 # 1366
 # iphone 500
 width = 500
+screenWidth = 1366
 
 # 768
 # iphone 900
 height = 500
+screenHeight = 768
 s = 5
 
 circleMatrix = []
@@ -884,14 +901,11 @@ butt_startGeneration = ttk.Button(master=overlayFrame, command=myApp, text="star
 butt_startGeneration.grid(row=10, column=6)
 
 # create and show the frame
-frame = ttk.Frame(win, width=width, height=height)
+frame = ttk.Frame(win, width=screenWidth, height=screenHeight)
 
 # create a canvas for the frame
-canvas_mandala = ttk.Canvas(master=frame, bg='#FFFFFF', width=width, height=height, scrollregion=(0, 0, 500, 500))
-canvas_mandala.pack()
-
-# show canvas in frame
-canvas_mandala.pack(expand=True, fill=ttk.BOTH)
+canvas_mandala = ttk.Canvas(master=frame, width=width, height=height, scrollregion=(0, 0, 500, 500))
+canvas_mandala.grid(row=0, column=0, sticky="E")
 
 showEvery = 100
 

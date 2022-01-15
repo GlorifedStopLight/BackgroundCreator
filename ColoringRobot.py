@@ -12,6 +12,7 @@ import os
 from os.path import exists
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
+from functools import partial
 
 import subprocess
 from PIL import ImageGrab
@@ -820,13 +821,22 @@ win = ttk.Window(themename="yeti")
 overlayFrame = ttk.Frame(master=win)
 overlayFrame.grid(row=0, column=0, padx=30, pady=30)
 
+frame_dotSettings = ttk.Frame(master=overlayFrame)
+frame_dotSettings.grid(row=0, column=0)
+
 # holds miscellaneous settings widgets
-frame_settings = ttk.Frame(master=overlayFrame)
+frame_settings = ttk.Frame(master=frame_dotSettings)
 frame_settings.grid(row=0, column=2, padx=20)
 
 # holds widgets that control the colors
-frame_colors = ttk.Frame(master=overlayFrame)
+frame_colors = ttk.Frame(master=frame_dotSettings)
 frame_colors.grid(row=0, column=3, padx=20)
+
+frame_globalSettings = ttk.Frame(master=overlayFrame)
+frame_globalSettings.grid(row=0, column=1)
+
+notebook_dots = ttk.Notebook(master=overlayFrame)
+notebook_dots.grid(row=0, column=10)
 
 # list of colors
 listbox_colorPallet = DragDropListbox(master=frame_colors)
@@ -858,10 +868,6 @@ entry_branchCount.insert(0, "4")
 checkBoxSelected_isMirrored = ttk.IntVar()
 checkBox_isMirrored = ttk.Checkbutton(master=frame_settings, text="mirrored", variable=checkBoxSelected_isMirrored)
 checkBox_isMirrored.grid(row=3, column=0)
-
-checkBoxSelected_addWaterMarkToScreenShots = ttk.IntVar()
-checkBox_addWaterMarkToScreenShots = ttk.Checkbutton(master=frame_settings, text="add water mark to screenshots", variable=checkBoxSelected_addWaterMarkToScreenShots)
-checkBox_addWaterMarkToScreenShots.grid(row=4, column=0)
 
 dropSelected_generationOptions = ttk.StringVar()
 drop_generationOptions = ttk.OptionMenu(frame_settings, dropSelected_generationOptions, movementTypes[0],
@@ -906,6 +912,13 @@ frame = ttk.Frame(win, width=screenWidth, height=screenHeight)
 # create a canvas for the frame
 canvas_mandala = ttk.Canvas(master=frame, width=width, height=height, scrollregion=(0, 0, 500, 500))
 canvas_mandala.grid(row=0, column=0, sticky="E")
+
+checkBoxSelected_addWaterMarkToScreenShots = ttk.IntVar()
+checkBox_addWaterMarkToScreenShots = ttk.Checkbutton(master=frame_globalSettings, text="add water mark to screenshots", variable=checkBoxSelected_addWaterMarkToScreenShots)
+checkBox_addWaterMarkToScreenShots.grid(row=4, column=0)
+
+butt_addTab = ttk.Button(master=frame_globalSettings, text="add dot generator", command=partial(notebook_dots.add, text="melon", child=frame_dotSettings))
+butt_addTab.grid(row=1, column=0)
 
 showEvery = 100
 

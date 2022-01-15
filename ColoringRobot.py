@@ -238,7 +238,7 @@ class DotMaker:
         if self.xDirection and self.cords[0] + self.addX < self.moveHere[0] or \
                 not self.xDirection and self.cords[0] + self.addX > self.moveHere[0]:
             self.cords[0] += self.addX
-            self.cords[1] = self.moveHere[1] + ((self.m[1]/self.m[0]) * (self.cords[0] - self.moveHere[0]))
+            self.cords[1] = self.moveHere[1] + ((self.m[1] / self.m[0]) * (self.cords[0] - self.moveHere[0]))
             conditions[0] = False
         """
         if self.yDirection and self.cords[1] + self.addY < self.moveHere[1] or \
@@ -255,14 +255,14 @@ class DotMaker:
             self.m = (self.cords[0] - self.moveHere[0]), (self.cords[1] - self.moveHere[1])
 
             if self.xDirection:
-                self.addX = s * self.m[0]/self.m[1]
+                self.addX = s * self.m[0] / self.m[1]
             else:
-                self.addX = s * self.m[0]/self.m[1]
+                self.addX = s * self.m[0] / self.m[1]
 
             if self.yDirection:
-                self.addY = -s * self.m[1]/self.m[0]
+                self.addY = -s * self.m[1] / self.m[0]
             else:
-                self.addY = -s * self.m[1]/self.m[0]
+                self.addY = -s * self.m[1] / self.m[0]
 
     def bouncingLineGen(self):
 
@@ -476,15 +476,15 @@ class DragDropListbox(tk.Listbox):
 
 class DotGUITab:
 
-    def __init__(self, frame_dotSettings, frame_colors):
+    def __init__(self, frame_dotSettings, frame_colors, tabName):
 
         self.frame_dotSettings = frame_dotSettings
         self.frame_dotSettings.grid(row=0, column=0)
 
-        # add a tab
-        notebook_dots.add(child=self.frame_dotSettings, text="melon")
+        self.tabName = tabName
 
-        self.name = "melon"
+        # add a tab
+        notebook_dots.add(child=self.frame_dotSettings, text=self.tabName)
 
         self.listbox_colorPallet = DragDropListbox(master=frame_colors)
         self.listbox_colorPallet.grid(row=1, column=0)
@@ -510,8 +510,9 @@ class DotGUITab:
         self.checkBox_isMirrored.grid(row=3, column=0)
 
         self.dropSelected_generationOptions = ttk.StringVar()
-        self.drop_generationOptions = ttk.OptionMenu(self.frame_dotSettings, self.dropSelected_generationOptions, movementTypes[0],
-                                                *movementTypes, style="secondary")
+        self.drop_generationOptions = ttk.OptionMenu(self.frame_dotSettings, self.dropSelected_generationOptions,
+                                                     movementTypes[0],
+                                                     *movementTypes, style="secondary")
         self.drop_generationOptions.grid(row=0, column=0)
 
         # add color
@@ -519,27 +520,33 @@ class DotGUITab:
         self.butt_chooseColor.grid(row=2, column=0, sticky="W", pady=5)
 
         # button to remove color
-        self.butt_removeColor = ttk.Button(master=frame_colors, text="-", command=self.removeSelectedColorFromColorPallet)
+        self.butt_removeColor = ttk.Button(master=frame_colors, text="-",
+                                           command=self.removeSelectedColorFromColorPallet)
         self.butt_removeColor.grid(row=2, column=0, sticky="E", pady=5)
 
         self.butt_randomColor = ttk.Button(master=frame_colors, text="rand", command=self.addRandomColor)
         self.butt_randomColor.grid(row=2, column=0)
 
         # save the colors you've chosen in a json file
-        self.butt_saveColorPreset = ttk.Button(master=frame_colors, text="save color preset", command=saveColorPreset,
-                                          style="success")
+        self.butt_saveColorPreset = ttk.Button(master=frame_colors, text="save color preset",
+                                               command=self.saveColorPreset,
+                                               style="success")
         self.butt_saveColorPreset.grid(row=3, column=0, pady=5)
 
         # button to delete the selected color preset
-        self.butt_deleteColorPreset = ttk.Button(master=frame_colors, text="delete color preset", command=deleteColorPreset,
-                                            style="danger")
+        self.butt_deleteColorPreset = ttk.Button(master=frame_colors, text="delete color preset",
+                                                 command=self.deleteColorPreset,
+                                                 style="danger")
         self.butt_deleteColorPreset.grid(row=4, column=0, pady=5)
 
         # datatype of menu text
         self.dropSelected_colorPalletPresets = ttk.StringVar()
 
-        self.drop_colorPresets = ttk.OptionMenu(frame_colors, self.dropSelected_colorPalletPresets, "--select a preset--",
-                                           *getColorPresetNames(), command=loadColorPreset)
+        self.drop_colorPresets = ttk.OptionMenu(frame_colors,
+                                                self.dropSelected_colorPalletPresets,
+                                                "--select a preset--",
+                                                *self.getColorPresetNames(),
+                                                command=self.loadColorPreset)
         self.drop_colorPresets.grid(row=0, column=0, pady=5)
 
     def addRandomColor(self):
@@ -554,8 +561,8 @@ class DotGUITab:
 
         self.listbox_colorPallet.insert("end", rgbValue)
         self.listbox_colorPallet.itemconfig("end", {"bg": selectedColor, "selectbackground": selectedColor,
-                                               "fg": selectedColor,
-                                               "selectforeground": rgb_to_hex(invertRGBValues(rgbValue))})
+                                                    "fg": selectedColor,
+                                                    "selectforeground": rgb_to_hex(invertRGBValues(rgbValue))})
 
     def removeSelectedColorFromColorPallet(self):
         self.listbox_colorPallet.delete(self.listbox_colorPallet.curselection())
@@ -565,8 +572,123 @@ class DotGUITab:
         rgbValue = (floor(selectedColor[0][0]), floor(selectedColor[0][1]), floor(selectedColor[0][2]))
         self.listbox_colorPallet.insert("end", rgbValue)
         self.listbox_colorPallet.itemconfig("end", {"bg": selectedColor[1], "selectbackground": selectedColor[1],
-                                               "fg": selectedColor[1],
-                                               "selectforeground": rgb_to_hex(invertRGBValues(rgbValue))})
+                                                    "fg": selectedColor[1],
+                                                    "selectforeground": rgb_to_hex(invertRGBValues(rgbValue))})
+
+    def saveColorPreset(self):
+
+        colorPresetName = simpledialog.askstring(title="Save Color Preset",
+                                                 prompt="Enter the name of your new color preset:")
+
+        if colorPresetName == "":
+            print("no given name for preset")
+            return
+
+        with open("mySavedData.json") as outfile:
+
+            # load all of the current presets
+            info = json.load(outfile)
+
+            # initialize the list for colors
+            presetColors = []
+
+            # loop through each line in listbox
+            for i in range(self.listbox_colorPallet.size()):
+                # add the name to the list (the name is a color)
+                presetColors.append(self.listbox_colorPallet.get(i))
+
+            # create a new color preset
+            info["savedColors"][colorPresetName] = presetColors
+
+            # create a json object
+            json_object = json.dumps(info, indent=4)
+
+        # Writing to sample.json
+        with open("mySavedData.json", "w") as outfile:
+
+            outfile.write(json_object)
+
+        """
+        menu = drop_colorPresets["menu"]
+        menu.delete(0, "end")
+        for string in getColorPresetNames():
+            menu.add_command(label=string,
+                             command=lambda value=string: dropSelected_colorPalletPresets.set(value))
+        """
+
+    # returns a list of strings which are the names of saved color presets
+    def getColorPresetNames(self):
+        # open json file (contains saved information)
+        with open("mySavedData.json") as outfile:
+            # convert the json file into a python object
+            allSavedData = json.load(outfile)
+
+            # get all the names of the color presets
+            allColorPresetNames = list(allSavedData["savedColors"].keys())
+
+            return allColorPresetNames
+
+    def loadColorPreset(self, event):
+        # open save data
+        with open("mySavedData.json") as outfile:
+
+            # convert save data into a python object
+            saveData = json.load(outfile)
+
+            # get the currently selected preset name
+            colorPresetName = self.dropSelected_colorPalletPresets.get()
+
+            try:
+                # get the array of colors from data using colorPresetName
+                loadedColors = saveData["savedColors"][colorPresetName]
+
+            # preset name doesn't exist
+            except KeyError:
+
+                print("preset name does not exist")
+
+                # give up
+                return
+
+            # go through each line and remove it
+            for i in range(self.listbox_colorPallet.size()):
+                self.listbox_colorPallet.delete(0)
+
+            # add each color to our listbox of colors
+            for color in loadedColors:
+                self.listbox_colorPallet.insert("end", color)
+                self.listbox_colorPallet.itemconfig("end",
+                                                    {"bg": rgb_to_hex(color), "selectbackground": rgb_to_hex(color),
+                                                     "fg": rgb_to_hex(color),
+                                                     "selectforeground": rgb_to_hex(invertRGBValues(color))})
+
+    def getCurrentColorPalletColors(self):
+        currentColors = []
+
+        for i in range(self.listbox_colorPallet.size()):
+            currentColors.append(self.listbox_colorPallet.get(i))
+
+        return currentColors
+
+    def deleteColorPreset(self):
+        presetName = self.dropSelected_colorPalletPresets.get()
+        x = messagebox.askquestion("Warning", "are you sure you would like \n to delete " + presetName + "?")
+
+        if x == "yes":
+            with open("mySavedData.json") as outfile:
+                savedData = json.load(outfile)
+
+                del savedData["savedColors"][presetName]
+
+            with open("mySavedData.json", "w") as outfile:
+                json_object = json.dumps(savedData, indent=4)
+                outfile.write(json_object)
+
+        # at least one color preset still exists
+        # if getColorPresetNames():
+
+        # set the selected item in the drop down menu to the first item in the menu
+        # dropSelected_colorPalletPresets.set(getColorPresetNames()[0])
 
 
 def hex_to_rgb(value):
@@ -595,98 +717,8 @@ def saveSeed():
         outfile.write(json_object)
 
 
-def saveColorPreset():
-    global drop_colorPresets
-
-    colorPresetName = simpledialog.askstring(title="Save Color Preset",
-                                             prompt="Enter the name of your new color preset:")
-
-    if colorPresetName == "":
-        print("no given name for preset")
-        return
-
-    with open("mySavedData.json") as outfile:
-
-        # load all of the current presets
-        info = json.load(outfile)
-
-        # initialize the list for colors
-        presetColors = []
-
-        # loop through each line in listbox
-        for i in range(listbox_colorPallet.size()):
-            # add the name to the list (the name is a color)
-            presetColors.append(listbox_colorPallet.get(i))
-
-        # create a new color preset
-        info["savedColors"][colorPresetName] = presetColors
-
-        # create a json object
-        json_object = json.dumps(info, indent=4)
-
-    # Writing to sample.json
-    with open("mySavedData.json", "w") as outfile:
-
-        outfile.write(json_object)
-
-    """
-    menu = drop_colorPresets["menu"]
-    menu.delete(0, "end")
-    for string in getColorPresetNames():
-        menu.add_command(label=string,
-                         command=lambda value=string: dropSelected_colorPalletPresets.set(value))
-    """
-
-
-# returns a list of strings which are the names of saved color presets
-def getColorPresetNames():
-    # open json file (contains saved information)
-    with open("mySavedData.json") as outfile:
-        # convert the json file into a python object
-        allSavedData = json.load(outfile)
-
-        # get all the names of the color presets
-        allColorPresetNames = list(allSavedData["savedColors"].keys())
-
-        return allColorPresetNames
-
-
 def invertRGBValues(rgb):
     return 255 - rgb[0], 255 - rgb[1], 255 - rgb[2]
-
-
-def loadColorPreset(event):
-    # open save data
-    with open("mySavedData.json") as outfile:
-
-        # convert save data into a python object
-        saveData = json.load(outfile)
-
-        # get the currently selected preset name
-        colorPresetName = dropSelected_colorPalletPresets.get()
-
-        try:
-            # get the array of colors from data using colorPresetName
-            loadedColors = saveData["savedColors"][colorPresetName]
-
-        # preset name doesn't exist
-        except KeyError:
-
-            print("preset name does not exist")
-
-            # give up
-            return
-
-        # go through each line and remove it
-        for i in range(listbox_colorPallet.size()):
-            listbox_colorPallet.delete(0)
-
-        # add each color to our listbox of colors
-        for color in loadedColors:
-            listbox_colorPallet.insert("end", color)
-            listbox_colorPallet.itemconfig("end", {"bg": rgb_to_hex(color), "selectbackground": rgb_to_hex(color),
-                                                   "fg": rgb_to_hex(color),
-                                                   "selectforeground": rgb_to_hex(invertRGBValues(color))})
 
 
 def getPresetColors(presetName):
@@ -697,15 +729,6 @@ def getPresetColors(presetName):
 
         # return colors
         return allData["savedColors"][presetName]
-
-
-def getCurrentColorPalletColors():
-    currentColors = []
-
-    for i in range(listbox_colorPallet.size()):
-        currentColors.append(listbox_colorPallet.get(i))
-
-    return currentColors
 
 
 def toggleOverlay(event):
@@ -750,27 +773,6 @@ def drawRect(x, y, w, h, c):
             circleMatrix[x][y] = canvas_mandala.create_oval(x - w, y - h, x + w, y + h, fill=rgb_to_hex(c), outline='')
 
 
-def deleteColorPreset():
-    presetName = dropSelected_colorPalletPresets.get()
-    x = messagebox.askquestion("Warning", "are you sure you would like \n to delete " + presetName + "?")
-
-    if x == "yes":
-        with open("mySavedData.json") as outfile:
-            savedData = json.load(outfile)
-
-            del savedData["savedColors"][presetName]
-
-        with open("mySavedData.json", "w") as outfile:
-            json_object = json.dumps(savedData, indent=4)
-            outfile.write(json_object)
-
-    # at least one color preset still exists
-    # if getColorPresetNames():
-
-    # set the selected item in the drop down menu to the first item in the menu
-    # dropSelected_colorPalletPresets.set(getColorPresetNames()[0])
-
-
 def returnNumberFromString(givenString):
     letters = "0123456789abcdefghijklmnopqrstuvwxyz,./<>?;':[]{}\| _+-=)(*&^%$#@!~`"
     numberString = ""
@@ -785,24 +787,28 @@ class myApp:
     def __init__(self):
         chosenSeed = returnNumberFromString(entry_seedInput.get())
 
-        if not getCurrentColorPalletColors():
-            messagebox.showerror(title="Color Error", message="must have at least one color in the color pallet")
-            return
+        for preset in dotsDict:
 
-        elif len(getCurrentColorPalletColors()) == 1:
-            if not messagebox.askyesno(title="U GOOF", message="you're only using one color so you're a goof \n "
-                                                               "you may only continue if you agree that you're dumb"):
+            if not dotsDict[preset].getCurrentColorPalletColors():
+                messagebox.showerror(title="Color Error", message="must have at least one color in the color pallet")
                 return
 
-        seed(chosenSeed)
-        self.myControl = ControlAll(colorSelection=getCurrentColorPalletColors(),
-                                    colorSpeed=float(entry_colorSpeed.get()),
-                                    branchNumber=int(entry_branchCount.get()),
-                                    isBranchesMirrored=checkBoxSelected_isMirrored.get(),
-                                    moveType=dropSelected_generationOptions.get())
+            elif len(dotsDict[preset].getCurrentColorPalletColors()) == 1:
+                if not messagebox.askyesno(title="U GOOF", message="you're only using one color so you're a goof \n "
+                                                                   "you may only continue if you agree that you're dumb"):
+                    return
 
-        myThreadCool = Thread(target=self.generationLoop)
-        myThreadCool.start()
+        seed(chosenSeed)
+
+        for preset in dotsDict:
+            self.myControl = ControlAll(colorSelection=dotsDict[preset].getCurrentColorPalletColors(),
+                                        colorSpeed=float(dotsDict[preset].entry_colorSpeed.get()),
+                                        branchNumber=int(dotsDict[preset].entry_branchCount.get()),
+                                        isBranchesMirrored=dotsDict[preset].checkBoxSelected_isMirrored.get(),
+                                        moveType=dotsDict[preset].dropSelected_generationOptions.get())
+
+            myThreadCool = Thread(target=self.generationLoop)
+            myThreadCool.start()
 
     def generationLoop(self):
         while True:
@@ -810,7 +816,6 @@ class myApp:
 
 
 def shot(event):
-
     # ask user what the image name should be
     imageName = simpledialog.askstring(title="Screenshot", prompt="Enter a name for this image: ")
 
@@ -818,7 +823,8 @@ def shot(event):
     if exists('myImages/' + imageName + '.png'):
 
         # ask user whether or not to override old screenshot
-        overrideScreenshot = messagebox.askokcancel(title="Error: Name In Use", message=imageName + ".png already exists. Would you like to override this file?")
+        overrideScreenshot = messagebox.askokcancel(title="Error: Name In Use",
+                                                    message=imageName + ".png already exists. Would you like to override this file?")
 
         # user wanted to override the old screenshot
         if not overrideScreenshot:
@@ -829,6 +835,7 @@ def shot(event):
     canvas_mandala.postscript(file="myImages/screenshot.ps", colormode='color')
     psimage = Image.open('myImages/screenshot.ps')
     psimage.save('myImages/' + imageName + '.png')
+    psimage.save('myImages/' + 'MOSTRECENTSCREENSHOT' + '.png')
 
     if checkBoxSelected_addWaterMarkToScreenShots.get():
 
@@ -856,7 +863,13 @@ def shot(event):
 
 
 def printImage(event):
-    os.system("lpr -P HP_Color_LaserJet_MFP_M281fdw__DDA757_ /Users/markhanna/PycharmProjects/PrettyMaker/file_name.png")
+    printMe = simpledialog.askstring(title="Printer", prompt="Enter the name of your picture, \n leave blank to print most recently saved: ")
+
+    if printMe == "":
+        printMe = 'MOSTRECENTSCREENSHOT'
+
+    os.system(
+        "lpr -P HP_Color_LaserJet_MFP_M281fdw__DDA757_ myImages/" + printMe + ".png")
 
 
 def addDotConfigureTab():
@@ -866,9 +879,9 @@ def addDotConfigureTab():
     frame_colors = ttk.Frame(master=frame_dotSettings)
     frame_colors.grid(row=0, column=3, padx=20)
 
-    dotsDict["melon2.0"] = DotGUITab(frame_dotSettings, frame_colors)
+    name = "Dot Gen " + str(len(dotsDict) + 1)
 
-
+    dotsDict[name] = DotGUITab(frame_dotSettings, frame_colors, name)
 
 
 # 1366
@@ -928,7 +941,8 @@ canvas_mandala = ttk.Canvas(master=frame, width=width, height=height, scrollregi
 canvas_mandala.grid(row=0, column=0, sticky="E")
 
 checkBoxSelected_addWaterMarkToScreenShots = ttk.IntVar()
-checkBox_addWaterMarkToScreenShots = ttk.Checkbutton(master=frame_globalSettings, text="add water mark to screenshots", variable=checkBoxSelected_addWaterMarkToScreenShots)
+checkBox_addWaterMarkToScreenShots = ttk.Checkbutton(master=frame_globalSettings, text="add water mark to screenshots",
+                                                     variable=checkBoxSelected_addWaterMarkToScreenShots)
 checkBox_addWaterMarkToScreenShots.grid(row=4, column=0)
 
 butt_addTab = ttk.Button(master=frame_globalSettings, text="add dot generator", command=addDotConfigureTab)

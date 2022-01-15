@@ -474,6 +474,76 @@ class DragDropListbox(tk.Listbox):
             self.curIndex = i
 
 
+class DotGUITab:
+
+    def __init__(self, frame_dotSettings):
+
+        self.frame_dotSettings = frame_dotSettings
+        self.frame_dotSettings.grid(row=0, column=0)
+
+        # add a tab
+        notebook_dots.add(child=self.frame_dotSettings, text="melon")
+
+        self.name = "melon"
+
+        self.listbox_colorPallet = DragDropListbox(master=frame_colors)
+        self.listbox_colorPallet.grid(row=1, column=0)
+
+        self.label_colorSpeed = ttk.Label(master=frame_settings, text="color speed")
+        self.label_colorSpeed.grid(row=1, column=0)
+
+        self.entry_colorSpeed = ttk.Entry(master=frame_settings, width=5)
+        self.entry_colorSpeed.grid(row=1, column=1)
+        self.entry_colorSpeed.insert(0, "0.3")
+
+        self.label_branchCount = ttk.Label(master=frame_settings, text="branch Count")
+        self.label_branchCount.grid(row=2, column=0)
+
+        self.entry_branchCount = ttk.Entry(master=frame_settings, width=5)
+        self.entry_branchCount.grid(row=2, column=1)
+        self.entry_branchCount.insert(0, "4")
+
+        self.checkBoxSelected_isMirrored = ttk.IntVar()
+        self.checkBox_isMirrored = ttk.Checkbutton(master=frame_settings,
+                                                   text="mirrored",
+                                                   variable=self.checkBoxSelected_isMirrored)
+        self.checkBox_isMirrored.grid(row=3, column=0)
+
+        self.dropSelected_generationOptions = ttk.StringVar()
+        self.drop_generationOptions = ttk.OptionMenu(frame_settings, self.dropSelected_generationOptions, movementTypes[0],
+                                                *movementTypes, style="secondary")
+        self.drop_generationOptions.grid(row=0, column=0)
+
+        # add color
+        self.butt_chooseColor = ttk.Button(master=frame_colors, text="+", command=addColorToColorPallet)
+        self.butt_chooseColor.grid(row=2, column=0, sticky="W", pady=5)
+
+        # button to remove color
+        self.butt_removeColor = ttk.Button(master=frame_colors, text="-", command=removeSelectedColorFromColorPallet)
+        self.butt_removeColor.grid(row=2, column=0, sticky="E", pady=5)
+
+        self.butt_randomColor = ttk.Button(master=frame_colors, text="rand", command=addRandomColor)
+        self.butt_randomColor.grid(row=2, column=0)
+
+        # save the colors you've chosen in a json file
+        self.butt_saveColorPreset = ttk.Button(master=frame_colors, text="save color preset", command=saveColorPreset,
+                                          style="success")
+        self.butt_saveColorPreset.grid(row=3, column=0, pady=5)
+
+        # button to delete the selected color preset
+        self.butt_deleteColorPreset = ttk.Button(master=frame_colors, text="delete color preset", command=deleteColorPreset,
+                                            style="danger")
+        self.butt_deleteColorPreset.grid(row=4, column=0, pady=5)
+
+        # datatype of menu text
+        self.dropSelected_colorPalletPresets = ttk.StringVar()
+
+        self.drop_colorPresets = ttk.OptionMenu(frame_colors, self.dropSelected_colorPalletPresets, "--select a preset--",
+                                           *getColorPresetNames(), command=loadColorPreset)
+        self.drop_colorPresets.grid(row=0, column=0, pady=5)
+
+
+
 def hex_to_rgb(value):
     value = value.lstrip('#')
     lv = len(value)
@@ -793,6 +863,12 @@ def printImage(event):
     os.system("lpr -P HP_Color_LaserJet_MFP_M281fdw__DDA757_ /Users/markhanna/PycharmProjects/PrettyMaker/file_name.png")
 
 
+def addDotConfigureTab():
+    dotsDict["melon2.0"] = DotGUITab(ttk.Frame(master=overlayFrame))
+
+
+
+
 # 1366
 # iphone 500
 width = 500
@@ -817,6 +893,8 @@ randomSeed = randint(0, 1000000000)
 
 movementTypes = ["random", "bouncing line", "point by point", "direct point by point", "random point by point"]
 
+dotsDict = {}
+
 win = ttk.Window(themename="yeti")
 overlayFrame = ttk.Frame(master=win)
 overlayFrame.grid(row=0, column=0, padx=30, pady=30)
@@ -838,10 +916,6 @@ frame_globalSettings.grid(row=0, column=1)
 notebook_dots = ttk.Notebook(master=overlayFrame)
 notebook_dots.grid(row=0, column=10)
 
-# list of colors
-listbox_colorPallet = DragDropListbox(master=frame_colors)
-listbox_colorPallet.grid(row=1, column=0)
-
 # gets the desired seed to save
 entry_seedInput = ttk.Entry(master=overlayFrame, width=30)
 entry_seedInput.grid(row=0, column=0)
@@ -851,56 +925,6 @@ entry_seedInput.insert(0, str(randomSeed))
 butt_saveSeed = ttk.Button(master=overlayFrame, text="Save Seed", command=saveSeed, style="success")
 butt_saveSeed.grid(row=1, column=0)
 
-label_colorSpeed = ttk.Label(master=frame_settings, text="color speed")
-label_colorSpeed.grid(row=1, column=0)
-
-entry_colorSpeed = ttk.Entry(master=frame_settings, width=5)
-entry_colorSpeed.grid(row=1, column=1)
-entry_colorSpeed.insert(0, "0.3")
-
-label_branchCount = ttk.Label(master=frame_settings, text="branch Count")
-label_branchCount.grid(row=2, column=0)
-
-entry_branchCount = ttk.Entry(master=frame_settings, width=5)
-entry_branchCount.grid(row=2, column=1)
-entry_branchCount.insert(0, "4")
-
-checkBoxSelected_isMirrored = ttk.IntVar()
-checkBox_isMirrored = ttk.Checkbutton(master=frame_settings, text="mirrored", variable=checkBoxSelected_isMirrored)
-checkBox_isMirrored.grid(row=3, column=0)
-
-dropSelected_generationOptions = ttk.StringVar()
-drop_generationOptions = ttk.OptionMenu(frame_settings, dropSelected_generationOptions, movementTypes[0],
-                                        *movementTypes, style="secondary")
-drop_generationOptions.grid(row=0, column=0)
-
-# add color
-butt_chooseColor = ttk.Button(master=frame_colors, text="+", command=addColorToColorPallet)
-butt_chooseColor.grid(row=2, column=0, sticky="W", pady=5)
-
-# button to remove color
-butt_removeColor = ttk.Button(master=frame_colors, text="-", command=removeSelectedColorFromColorPallet)
-butt_removeColor.grid(row=2, column=0, sticky="E", pady=5)
-
-butt_randomColor = ttk.Button(master=frame_colors, text="rand", command=addRandomColor)
-butt_randomColor.grid(row=2, column=0)
-
-# save the colors you've chosen in a json file
-butt_saveColorPreset = ttk.Button(master=frame_colors, text="save color preset", command=saveColorPreset,
-                                  style="success")
-butt_saveColorPreset.grid(row=3, column=0, pady=5)
-
-# button to delete the selected color preset
-butt_deleteColorPreset = ttk.Button(master=frame_colors, text="delete color preset", command=deleteColorPreset,
-                                    style="danger")
-butt_deleteColorPreset.grid(row=4, column=0, pady=5)
-
-# datatype of menu text
-dropSelected_colorPalletPresets = ttk.StringVar()
-
-drop_colorPresets = ttk.OptionMenu(frame_colors, dropSelected_colorPalletPresets, "--select a preset--",
-                                   *getColorPresetNames(), command=loadColorPreset)
-drop_colorPresets.grid(row=0, column=0, pady=5)
 
 # generates a mandala
 butt_startGeneration = ttk.Button(master=overlayFrame, command=myApp, text="start generation")
@@ -917,7 +941,7 @@ checkBoxSelected_addWaterMarkToScreenShots = ttk.IntVar()
 checkBox_addWaterMarkToScreenShots = ttk.Checkbutton(master=frame_globalSettings, text="add water mark to screenshots", variable=checkBoxSelected_addWaterMarkToScreenShots)
 checkBox_addWaterMarkToScreenShots.grid(row=4, column=0)
 
-butt_addTab = ttk.Button(master=frame_globalSettings, text="add dot generator", command=partial(notebook_dots.add, text="melon", child=frame_dotSettings))
+butt_addTab = ttk.Button(master=frame_globalSettings, text="add dot generator", command=addDotConfigureTab)
 butt_addTab.grid(row=1, column=0)
 
 showEvery = 100

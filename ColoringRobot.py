@@ -476,7 +476,7 @@ class DragDropListbox(tk.Listbox):
 
 class DotGUITab:
 
-    def __init__(self, frame_dotSettings):
+    def __init__(self, frame_dotSettings, frame_colors):
 
         self.frame_dotSettings = frame_dotSettings
         self.frame_dotSettings.grid(row=0, column=0)
@@ -489,40 +489,40 @@ class DotGUITab:
         self.listbox_colorPallet = DragDropListbox(master=frame_colors)
         self.listbox_colorPallet.grid(row=1, column=0)
 
-        self.label_colorSpeed = ttk.Label(master=frame_settings, text="color speed")
+        self.label_colorSpeed = ttk.Label(master=self.frame_dotSettings, text="color speed")
         self.label_colorSpeed.grid(row=1, column=0)
 
-        self.entry_colorSpeed = ttk.Entry(master=frame_settings, width=5)
+        self.entry_colorSpeed = ttk.Entry(master=self.frame_dotSettings, width=5)
         self.entry_colorSpeed.grid(row=1, column=1)
         self.entry_colorSpeed.insert(0, "0.3")
 
-        self.label_branchCount = ttk.Label(master=frame_settings, text="branch Count")
+        self.label_branchCount = ttk.Label(master=self.frame_dotSettings, text="branch Count")
         self.label_branchCount.grid(row=2, column=0)
 
-        self.entry_branchCount = ttk.Entry(master=frame_settings, width=5)
+        self.entry_branchCount = ttk.Entry(master=self.frame_dotSettings, width=5)
         self.entry_branchCount.grid(row=2, column=1)
         self.entry_branchCount.insert(0, "4")
 
         self.checkBoxSelected_isMirrored = ttk.IntVar()
-        self.checkBox_isMirrored = ttk.Checkbutton(master=frame_settings,
+        self.checkBox_isMirrored = ttk.Checkbutton(master=self.frame_dotSettings,
                                                    text="mirrored",
                                                    variable=self.checkBoxSelected_isMirrored)
         self.checkBox_isMirrored.grid(row=3, column=0)
 
         self.dropSelected_generationOptions = ttk.StringVar()
-        self.drop_generationOptions = ttk.OptionMenu(frame_settings, self.dropSelected_generationOptions, movementTypes[0],
+        self.drop_generationOptions = ttk.OptionMenu(self.frame_dotSettings, self.dropSelected_generationOptions, movementTypes[0],
                                                 *movementTypes, style="secondary")
         self.drop_generationOptions.grid(row=0, column=0)
 
         # add color
-        self.butt_chooseColor = ttk.Button(master=frame_colors, text="+", command=addColorToColorPallet)
+        self.butt_chooseColor = ttk.Button(master=frame_colors, text="+", command=self.addColorToColorPallet)
         self.butt_chooseColor.grid(row=2, column=0, sticky="W", pady=5)
 
         # button to remove color
-        self.butt_removeColor = ttk.Button(master=frame_colors, text="-", command=removeSelectedColorFromColorPallet)
+        self.butt_removeColor = ttk.Button(master=frame_colors, text="-", command=self.removeSelectedColorFromColorPallet)
         self.butt_removeColor.grid(row=2, column=0, sticky="E", pady=5)
 
-        self.butt_randomColor = ttk.Button(master=frame_colors, text="rand", command=addRandomColor)
+        self.butt_randomColor = ttk.Button(master=frame_colors, text="rand", command=self.addRandomColor)
         self.butt_randomColor.grid(row=2, column=0)
 
         # save the colors you've chosen in a json file
@@ -542,6 +542,31 @@ class DotGUITab:
                                            *getColorPresetNames(), command=loadColorPreset)
         self.drop_colorPresets.grid(row=0, column=0, pady=5)
 
+    def addRandomColor(self):
+        rgbValue = []
+        color = [randint(0, 255), 255, 0]
+
+        for i in range(2, -1, -1):
+            rgbValue.append(color.pop(randint(0, i)))
+
+        rgbValue = [randint(0, 255), randint(0, 255), randint(0, 255)]
+        selectedColor = rgb_to_hex(rgbValue)
+
+        self.listbox_colorPallet.insert("end", rgbValue)
+        self.listbox_colorPallet.itemconfig("end", {"bg": selectedColor, "selectbackground": selectedColor,
+                                               "fg": selectedColor,
+                                               "selectforeground": rgb_to_hex(invertRGBValues(rgbValue))})
+
+    def removeSelectedColorFromColorPallet(self):
+        self.listbox_colorPallet.delete(self.listbox_colorPallet.curselection())
+
+    def addColorToColorPallet(self):
+        selectedColor = askcolor(title="Tkinter Color Chooser")
+        rgbValue = (floor(selectedColor[0][0]), floor(selectedColor[0][1]), floor(selectedColor[0][2]))
+        self.listbox_colorPallet.insert("end", rgbValue)
+        self.listbox_colorPallet.itemconfig("end", {"bg": selectedColor[1], "selectbackground": selectedColor[1],
+                                               "fg": selectedColor[1],
+                                               "selectforeground": rgb_to_hex(invertRGBValues(rgbValue))})
 
 
 def hex_to_rgb(value):
@@ -568,19 +593,6 @@ def saveSeed():
     # Writing to sample.json
     with open("mySavedData.json", "w") as outfile:
         outfile.write(json_object)
-
-
-def addColorToColorPallet():
-    selectedColor = askcolor(title="Tkinter Color Chooser")
-    rgbValue = (floor(selectedColor[0][0]), floor(selectedColor[0][1]), floor(selectedColor[0][2]))
-    listbox_colorPallet.insert("end", rgbValue)
-    listbox_colorPallet.itemconfig("end", {"bg": selectedColor[1], "selectbackground": selectedColor[1],
-                                           "fg": selectedColor[1],
-                                           "selectforeground": rgb_to_hex(invertRGBValues(rgbValue))})
-
-
-def removeSelectedColorFromColorPallet():
-    listbox_colorPallet.delete(listbox_colorPallet.curselection())
 
 
 def saveColorPreset():
@@ -797,22 +809,6 @@ class myApp:
             self.myControl.updateAllThings()
 
 
-def addRandomColor():
-    rgbValue = []
-    color = [randint(0, 255), 255, 0]
-
-    for i in range(2, -1, -1):
-        rgbValue.append(color.pop(randint(0, i)))
-
-    rgbValue = [randint(0, 255), randint(0, 255), randint(0, 255)]
-    selectedColor = rgb_to_hex(rgbValue)
-
-    listbox_colorPallet.insert("end", rgbValue)
-    listbox_colorPallet.itemconfig("end", {"bg": selectedColor, "selectbackground": selectedColor,
-                                           "fg": selectedColor,
-                                           "selectforeground": rgb_to_hex(invertRGBValues(rgbValue))})
-
-
 def shot(event):
 
     # ask user what the image name should be
@@ -864,7 +860,13 @@ def printImage(event):
 
 
 def addDotConfigureTab():
-    dotsDict["melon2.0"] = DotGUITab(ttk.Frame(master=overlayFrame))
+    # holds widgets that control the colors
+    frame_dotSettings = ttk.Frame(master=overlayFrame)
+
+    frame_colors = ttk.Frame(master=frame_dotSettings)
+    frame_colors.grid(row=0, column=3, padx=20)
+
+    dotsDict["melon2.0"] = DotGUITab(frame_dotSettings, frame_colors)
 
 
 
@@ -899,17 +901,6 @@ win = ttk.Window(themename="yeti")
 overlayFrame = ttk.Frame(master=win)
 overlayFrame.grid(row=0, column=0, padx=30, pady=30)
 
-frame_dotSettings = ttk.Frame(master=overlayFrame)
-frame_dotSettings.grid(row=0, column=0)
-
-# holds miscellaneous settings widgets
-frame_settings = ttk.Frame(master=frame_dotSettings)
-frame_settings.grid(row=0, column=2, padx=20)
-
-# holds widgets that control the colors
-frame_colors = ttk.Frame(master=frame_dotSettings)
-frame_colors.grid(row=0, column=3, padx=20)
-
 frame_globalSettings = ttk.Frame(master=overlayFrame)
 frame_globalSettings.grid(row=0, column=1)
 
@@ -924,7 +915,6 @@ entry_seedInput.insert(0, str(randomSeed))
 # save seed
 butt_saveSeed = ttk.Button(master=overlayFrame, text="Save Seed", command=saveSeed, style="success")
 butt_saveSeed.grid(row=1, column=0)
-
 
 # generates a mandala
 butt_startGeneration = ttk.Button(master=overlayFrame, command=myApp, text="start generation")

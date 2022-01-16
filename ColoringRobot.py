@@ -692,15 +692,33 @@ class DotGUITab:
 
 class ImageViewWindow:
     def __init__(self):
-        image = ttk.PhotoImage(file="myIcons/tiny.png")
 
-        self.myUniqueButt = ttk.Button(master=frame_photos, image=image, text="why an't this workin?")
-        self.myUniqueButt.grid(row=0, column=0)
-        self.myUniqueButt.image = image
+        path = "myIcons"
+        dir_list = os.listdir(path)
+
+        onlyPNGFiles = []
+        for fileName in dir_list:
+            if fileName.endswith(".png"):
+                onlyPNGFiles.append(fileName)
+
+        print(onlyPNGFiles)
+
+        itemsInEachRow = 3
+
+        self.icons = []
+        for pngFileIndex in range(len(onlyPNGFiles)):
+
+            image = ttk.PhotoImage(file="myIcons/" + onlyPNGFiles[pngFileIndex])
+            columnIndex = pngFileIndex % itemsInEachRow
+            rowIndex = pngFileIndex // itemsInEachRow
+
+            self.icons.append(ttk.Button(master=frame_photos, image=image, text="why an't this workin?"))
+            self.icons[pngFileIndex].grid(row=rowIndex, column=columnIndex)
+            self.icons[pngFileIndex].image = image
 
     def neverCalled(self):
-        iconSize = [(64, 64)]
-        name = "tiny"
+        iconSize = [(100, 100)]
+        name = "pastel butterfly"
         filename = "myImages/" + name + ".png"
         img = Image.open(filename)
 

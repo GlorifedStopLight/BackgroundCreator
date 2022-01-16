@@ -428,7 +428,6 @@ class ControlAll:
     def __init__(self, colorSelection, colorSpeed, branchNumber, isBranchesMirrored, moveType, startLocation=None):
         self.dotFactoryObj = DotMaker(branchNumber, isBranchesMirrored, colorSelection, colorSpeed,
                                       startLocation=startLocation, moveType=moveType)
-        toggleOverlay(None)
 
     def updateAllThings(self):
         getColorThread = Thread(target=self.dotFactoryObj.getNextColor)
@@ -731,21 +730,22 @@ def getPresetColors(presetName):
         return allData["savedColors"][presetName]
 
 
-def toggleOverlay(event):
-    global overlayOn
+def activateOverlayView(event):
+    frame_mandala.grid_forget()
+    frame_photos.grid_forget()
+    overlayFrame.grid(row=0, column=0)
 
-    if overlayOn:
 
-        overlayFrame.grid_forget()
-        frame.grid(row=0, column=0)
+def activateMandalaView(event):
+    overlayFrame.grid_forget()
+    frame_photos.grid_forget()
+    frame_mandala.grid(row=0, column=0)
 
-        overlayOn = False
 
-    else:
-        frame.grid_forget()
-        overlayFrame.grid(row=0, column=0)
-
-        overlayOn = True
+def activatePhotoView(event):
+    overlayFrame.grid_forget()
+    frame_mandala.grid_forget()
+    frame_photos.grid(row=0, column=0)
 
 
 def rgb_to_hex(rgb):
@@ -798,7 +798,11 @@ class myApp:
                                                                    "you may only continue if you agree that you're dumb"):
                     return
 
+        # set seed
         seed(chosenSeed)
+
+        # show mandala frame
+        activateMandalaView(None)
 
         for preset in dotsDict:
             self.myControl = ControlAll(colorSelection=dotsDict[preset].getCurrentColorPalletColors(),
@@ -917,6 +921,10 @@ overlayFrame.grid(row=0, column=0, padx=30, pady=30)
 frame_globalSettings = ttk.Frame(master=overlayFrame)
 frame_globalSettings.grid(row=0, column=1)
 
+frame_mandala = ttk.Frame(win, width=screenWidth, height=screenHeight)
+
+frame_photos = ttk.Frame(master=win, width=screenWidth, height=screenHeight)
+
 notebook_dots = ttk.Notebook(master=overlayFrame)
 notebook_dots.grid(row=0, column=10)
 
@@ -933,11 +941,8 @@ butt_saveSeed.grid(row=1, column=0)
 butt_startGeneration = ttk.Button(master=overlayFrame, command=myApp, text="start generation")
 butt_startGeneration.grid(row=10, column=6)
 
-# create and show the frame
-frame = ttk.Frame(win, width=screenWidth, height=screenHeight)
-
 # create a canvas for the frame
-canvas_mandala = ttk.Canvas(master=frame, width=width, height=height, scrollregion=(0, 0, 500, 500))
+canvas_mandala = ttk.Canvas(master=frame_mandala, width=width, height=height, scrollregion=(0, 0, 500, 500))
 canvas_mandala.grid(row=0, column=0, sticky="E")
 
 checkBoxSelected_addWaterMarkToScreenShots = ttk.IntVar()
@@ -952,9 +957,18 @@ showEvery = 100
 
 overlayOn = True
 
-win.bind("<Escape>", toggleOverlay)
 win.bind("<F2>", shot)
 win.bind("<p>", printImage)
+win.bind("1", activateOverlayView)
+win.bind("2", activateMandalaView)
+win.bind("3", activatePhotoView)
 win.attributes('-fullscreen', True)
 
+# add dot generator
+addDotConfigureTab()
 win.mainloop()
+
+# TODO: add a delete dot generator button, cure cancer, get multiple dot generators working, save generator presets,
+# TODO: save current set up, get a nice view for looking at previous screenshots, save preset when taking a screenshot,
+# TODO: add help buttons, add tutorial, able to pick which printer to print to, open screenshot folder in finder button
+# TODO: make default settings configurable

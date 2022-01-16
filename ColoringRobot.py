@@ -690,6 +690,28 @@ class DotGUITab:
         # dropSelected_colorPalletPresets.set(getColorPresetNames()[0])
 
 
+class ImageViewWindow:
+    def __init__(self):
+        image = ttk.PhotoImage(file="myIcons/tiny.png")
+
+        self.myUniqueButt = ttk.Button(master=frame_photos, image=image, text="why an't this workin?")
+        self.myUniqueButt.grid(row=0, column=0)
+        self.myUniqueButt.image = image
+
+    def neverCalled(self):
+        iconSize = [(64, 64)]
+        name = "tiny"
+        filename = "myImages/" + name + ".png"
+        img = Image.open(filename)
+
+        img.save("myIcons/" + name + '.ico', sizes=iconSize)
+
+        filename = "myIcons/" + name + ".ico"
+        img = Image.open(filename)
+
+        img.save("myIcons/" + name + '.png')
+
+
 def hex_to_rgb(value):
     value = value.lstrip('#')
     lv = len(value)
@@ -963,6 +985,8 @@ win.bind("1", activateOverlayView)
 win.bind("2", activateMandalaView)
 win.bind("3", activatePhotoView)
 win.attributes('-fullscreen', True)
+
+ImageViewWindow()
 
 # add dot generator
 addDotConfigureTab()

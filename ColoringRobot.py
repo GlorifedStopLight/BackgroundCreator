@@ -730,15 +730,28 @@ class ImageViewWindow:
             columnIndex = pngFileIndex % itemsInEachRow
             rowIndex = pngFileIndex // itemsInEachRow
 
-            self.icons.append(ttk.Button(master=frame_photos, image=image, text="why an't this workin?"))
+            editor = ImageEditor("myImages/" + onlyPNGFiles[pngFileIndex])
+
+            self.icons.append(ttk.Button(master=frame_photos, image=image, command=editor.showPhotoEditor))
             self.icons[pngFileIndex].grid(row=rowIndex, column=columnIndex)
             self.icons[pngFileIndex].image = image
 
 
-class ImageEditer:
+class ImageEditor:
     def __init__(self, fileName):
         self.fileName = fileName
-        pass
+        self.frame_pictureEdit = ttk.Frame(master=win, width=screenWidth, height=screenHeight)
+
+        image = ttk.PhotoImage(file=self.fileName)
+        self.label_image = ttk.Label(master=self.frame_pictureEdit, image=image)
+        self.label_image.grid(row=0, column=0)
+        self.label_image.image = image
+
+        # get the preset information using the fileName and the json file
+
+    def showPhotoEditor(self):
+        frame_photos.grid_forget()
+        self.frame_pictureEdit.grid(row=0, column=0)
 
 
 def hex_to_rgb(value):
@@ -994,6 +1007,7 @@ frame_globalSettings.grid(row=0, column=1)
 
 frame_mandala = ttk.Frame(win, width=screenWidth, height=screenHeight)
 
+# show each photo
 frame_photos = ttk.Frame(master=win, width=screenWidth, height=screenHeight)
 
 notebook_dots = ttk.Notebook(master=overlayFrame)

@@ -812,7 +812,6 @@ def activatePhotoView(event):
     frame_photos.grid(row=0, column=0)
 
 
-
 def rgb_to_hex(rgb):
     rgb = int(rgb[0]), int(rgb[1]), int(rgb[2])
 
@@ -1000,6 +999,9 @@ movementTypes = ["random", "bouncing line", "point by point", "direct point by p
 dotsDict = {}
 
 win = ttk.Window(themename="yeti")
+win.grid_rowconfigure(0, weight=1)
+win.grid_columnconfigure(0, weight=1)
+
 overlayFrame = ttk.Frame(master=win)
 overlayFrame.grid(row=0, column=0, padx=30, pady=30)
 

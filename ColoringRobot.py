@@ -795,21 +795,22 @@ def getPresetColors(presetName):
 
 
 def activateOverlayView(event):
-    frame_mandala.grid_forget()
-    frame_photos.grid_forget()
+    for childFrame in win.winfo_children():
+        childFrame.grid_forget()
     overlayFrame.grid(row=0, column=0)
 
 
 def activateMandalaView(event):
-    overlayFrame.grid_forget()
-    frame_photos.grid_forget()
+    for childFrame in win.winfo_children():
+        childFrame.grid_forget()
     frame_mandala.grid(row=0, column=0)
 
 
 def activatePhotoView(event):
-    overlayFrame.grid_forget()
-    frame_mandala.grid_forget()
+    for childFrame in win.winfo_children():
+        childFrame.grid_forget()
     frame_photos.grid(row=0, column=0)
+
 
 
 def rgb_to_hex(rgb):

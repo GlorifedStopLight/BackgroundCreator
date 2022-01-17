@@ -701,8 +701,6 @@ class ImageViewWindow:
             if fileName.endswith(".png"):
                 onlyPNGFiles.append(fileName)
 
-        print(onlyPNGFiles)
-
         itemsInEachRow = 3
 
         self.icons = []
@@ -715,19 +713,6 @@ class ImageViewWindow:
             self.icons.append(ttk.Button(master=frame_photos, image=image, text="why an't this workin?"))
             self.icons[pngFileIndex].grid(row=rowIndex, column=columnIndex)
             self.icons[pngFileIndex].image = image
-
-    def neverCalled(self):
-        iconSize = [(100, 100)]
-        name = "pastel butterfly"
-        filename = "myImages/" + name + ".png"
-        img = Image.open(filename)
-
-        img.save("myIcons/" + name + '.ico', sizes=iconSize)
-
-        filename = "myIcons/" + name + ".ico"
-        img = Image.open(filename)
-
-        img.save("myIcons/" + name + '.png')
 
 
 def hex_to_rgb(value):
@@ -879,7 +864,27 @@ def shot(event):
     canvas_mandala.postscript(file="myImages/screenshot.ps", colormode='color')
     psimage = Image.open('myImages/screenshot.ps')
     psimage.save('myImages/' + imageName + '.png')
+
+    psimage = Image.open('myImages/' + imageName + '.png')
+    psimage = psimage.crop((1, 1, width + 1, height + 1))
+    psimage.save('myImages/' + imageName + '.png')
+
     psimage.save('myImages/' + 'MOSTRECENTSCREENSHOT' + '.png')
+
+    # this code will add an icon of the new screenshot to the icons folder
+    iconSize = [(100, 100)]
+    filename = "myImages/" + imageName + ".png"
+    img = Image.open(filename)
+
+    # save as an icon, with low resolution
+    img.save("myIcons/" + imageName + '.ico', sizes=iconSize)
+
+    # open low resolution .ico image
+    filename = "myIcons/" + imageName + ".ico"
+    img = Image.open(filename)
+
+    # save image as png
+    img.save("myIcons/" + imageName + '.png')
 
     if checkBoxSelected_addWaterMarkToScreenShots.get():
 
@@ -982,8 +987,8 @@ butt_startGeneration = ttk.Button(master=overlayFrame, command=myApp, text="star
 butt_startGeneration.grid(row=10, column=6)
 
 # create a canvas for the frame
-canvas_mandala = ttk.Canvas(master=frame_mandala, width=width, height=height, scrollregion=(0, 0, 500, 500))
-canvas_mandala.grid(row=0, column=0, sticky="E")
+canvas_mandala = ttk.Canvas(master=frame_mandala, width=width, height=height)  #, scrollregion=(0, 0, 500, 500))
+canvas_mandala.grid(row=0, column=0)
 
 checkBoxSelected_addWaterMarkToScreenShots = ttk.IntVar()
 checkBox_addWaterMarkToScreenShots = ttk.Checkbutton(master=frame_globalSettings, text="add water mark to screenshots",

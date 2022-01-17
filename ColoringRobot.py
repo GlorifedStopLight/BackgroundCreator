@@ -6,16 +6,36 @@ import json
 from tkinter.colorchooser import askcolor
 from tkinter import messagebox
 import ttkbootstrap as ttk
-from ttkbootstrap.constants import *
 from tkinter import simpledialog
 import os
 from os.path import exists
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
-from functools import partial
 
-import subprocess
-from PIL import ImageGrab
+mockJsonFile = {
+    "imageName": {
+        "constants": {
+            "width": 500,
+            "height": 500,
+            "seed": 12,
+            "screenshotTakenAfterXDots": 92039
+        },
+        "dot generators": [
+            {
+                "branchCount": 3,
+                "isMirrored": True,
+                "colorPallet": ((255, 255, 255), (0, 0, 255), (0, 0, 0)),
+                "colorSpeed": 0.3
+            },
+            {
+                "branchCount": 2,
+                "isMirrored": True,
+                "colorPallet": ((255, 0, 255), (255, 0, 255), (0, 255, 0)),
+                "colorSpeed": 0.5
+            }
+        ]
+    }
+}
 
 
 def normal_round(n):
@@ -713,6 +733,12 @@ class ImageViewWindow:
             self.icons.append(ttk.Button(master=frame_photos, image=image, text="why an't this workin?"))
             self.icons[pngFileIndex].grid(row=rowIndex, column=columnIndex)
             self.icons[pngFileIndex].image = image
+
+
+class ImageEditer:
+    def __init__(self, fileName):
+        self.fileName = fileName
+        pass
 
 
 def hex_to_rgb(value):

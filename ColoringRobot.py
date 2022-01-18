@@ -25,13 +25,15 @@ mockJsonFile = {
                 "branchCount": 3,
                 "isMirrored": True,
                 "colorPallet": ((255, 255, 255), (0, 0, 255), (0, 0, 0)),
-                "colorSpeed": 0.3
+                "colorSpeed": 0.3,
+                "dotSize": 5
             },
             {
                 "branchCount": 2,
                 "isMirrored": True,
                 "colorPallet": ((255, 0, 255), (255, 0, 255), (0, 255, 0)),
-                "colorSpeed": 0.5
+                "colorSpeed": 0.5,
+                "dotSize": 5
             }
         ]
     }
@@ -795,18 +797,25 @@ def getPresetColors(presetName):
 
 
 def activateOverlayView(event):
+    if "entry" in win.focus_get():
+        return
+
     for childFrame in win.winfo_children():
         childFrame.grid_forget()
     overlayFrame.grid(row=0, column=0)
 
 
 def activateMandalaView(event):
+    if "entry" in win.focus_get():
+        return
     for childFrame in win.winfo_children():
         childFrame.grid_forget()
     frame_mandala.grid(row=0, column=0)
 
 
 def activatePhotoView(event):
+    if "entry" in win.focus_get():
+        return
     for childFrame in win.winfo_children():
         childFrame.grid_forget()
     frame_photos.grid(row=0, column=0)
@@ -867,20 +876,22 @@ class myApp:
 
         # show mandala frame
         activateMandalaView(None)
-
+        myThreads = []
         for preset in dotsDict:
-            self.myControl = ControlAll(colorSelection=dotsDict[preset].getCurrentColorPalletColors(),
-                                        colorSpeed=float(dotsDict[preset].entry_colorSpeed.get()),
-                                        branchNumber=int(dotsDict[preset].entry_branchCount.get()),
-                                        isBranchesMirrored=dotsDict[preset].checkBoxSelected_isMirrored.get(),
-                                        moveType=dotsDict[preset].dropSelected_generationOptions.get())
+            self.myControls = ControlAll(colorSelection=dotsDict[preset].getCurrentColorPalletColors(),
+                                    colorSpeed=float(dotsDict[preset].entry_colorSpeed.get()),
+                                    branchNumber=int(dotsDict[preset].entry_branchCount.get()),
+                                    isBranchesMirrored=dotsDict[preset].checkBoxSelected_isMirrored.get(),
+                                    moveType=dotsDict[preset].dropSelected_generationOptions.get())
 
-            myThreadCool = Thread(target=self.generationLoop)
-            myThreadCool.start()
+            myThreads.append(Thread(target=self.generationLoop))
+        for thread in myThreads:
+            thread.start()
+
 
     def generationLoop(self):
         while True:
-            self.myControl.updateAllThings()
+            self.myControls.updateAllThings()
 
 
 def shot(event):
@@ -974,12 +985,12 @@ def addDotConfigureTab():
 
 # 1366
 # iphone 500
-width = 500
+width = 1366
 screenWidth = 1366
 
 # 768
 # iphone 900
-height = 500
+height = 768
 screenHeight = 768
 s = 5
 
@@ -990,6 +1001,7 @@ for i in range(width + s):
         tempList.append(None)
 
     circleMatrix.append(tempList.copy())
+
 
 # pick a random seed
 randomSeed = randint(0, 1000000000)
@@ -1041,10 +1053,6 @@ checkBox_addWaterMarkToScreenShots.grid(row=4, column=0)
 butt_addTab = ttk.Button(master=frame_globalSettings, text="add dot generator", command=addDotConfigureTab)
 butt_addTab.grid(row=1, column=0)
 
-showEvery = 100
-
-overlayOn = True
-
 win.bind("<F2>", shot)
 win.bind("<p>", printImage)
 win.bind("1", activateOverlayView)
@@ -1059,6 +1067,9 @@ addDotConfigureTab()
 win.mainloop()
 
 # TODO: add a delete dot generator button, cure cancer, get multiple dot generators working, save generator presets,
-# TODO: save current set up, get a nice view for looking at previous screenshots, save preset when taking a screenshot,
+# TODO: save current set up, save preset when taking a screenshot
 # TODO: add help buttons, add tutorial, able to pick which printer to print to, open screenshot folder in finder button
 # TODO: make default settings configurable
+
+# TODO: after a variable number of dot iterations save the canvas as a screenshot, delete the canvas show the screenshot
+# TODO: and continue drawing.

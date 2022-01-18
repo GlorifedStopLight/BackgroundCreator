@@ -797,7 +797,7 @@ def getPresetColors(presetName):
 
 
 def activateOverlayView(event):
-    if "entry" in win.focus_get():
+    if "entry" in str(win.focus_get()):
         return
 
     for childFrame in win.winfo_children():
@@ -806,7 +806,7 @@ def activateOverlayView(event):
 
 
 def activateMandalaView(event):
-    if "entry" in win.focus_get():
+    if "entry" in str(win.focus_get()):
         return
     for childFrame in win.winfo_children():
         childFrame.grid_forget()
@@ -814,7 +814,7 @@ def activateMandalaView(event):
 
 
 def activatePhotoView(event):
-    if "entry" in win.focus_get():
+    if "entry" in str(win.focus_get()):
         return
     for childFrame in win.winfo_children():
         childFrame.grid_forget()
@@ -983,6 +983,10 @@ def addDotConfigureTab():
     dotsDict[name] = DotGUITab(frame_dotSettings, frame_colors, name)
 
 
+def deselect(event):
+    win.focus()
+
+
 # 1366
 # iphone 500
 width = 1366
@@ -1058,6 +1062,8 @@ win.bind("<p>", printImage)
 win.bind("1", activateOverlayView)
 win.bind("2", activateMandalaView)
 win.bind("3", activatePhotoView)
+win.bind("<Return>", deselect)
+
 win.attributes('-fullscreen', True)
 
 ImageViewWindow()

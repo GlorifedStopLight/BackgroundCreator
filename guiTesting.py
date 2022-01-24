@@ -1,13 +1,33 @@
 from tkinter import *
+from PIL import ImageFilter, Image
 
-def callback():
-    print(master.focus())
 
-master = Tk()
-e = Entry(master)
-e.pack()
-e.focus()
-b = Button(master, text="get", width=10, command=callback)
-b.pack()
+# Open existing image
+OriImage = Image.open('myImages/squid game marbles vibes.png')
+OriImage.show()
 
-master.mainloop()
+# Applying GaussianBlur filter
+gaussImage = OriImage.filter(ImageFilter.GaussianBlur(5))
+gaussImage.show()
+
+gaussImage = OriImage.filter(ImageFilter.EMBOSS())
+gaussImage.show()
+
+gaussImage = OriImage.filter(ImageFilter.CONTOUR())
+gaussImage.show()
+
+gaussImage = OriImage.filter(ImageFilter.EDGE_ENHANCE())
+gaussImage.show()
+
+gaussImage = OriImage.filter(ImageFilter.EDGE_ENHANCE_MORE())
+gaussImage.show()
+
+gaussImage = OriImage.filter(ImageFilter.FIND_EDGES())
+gaussImage.show()
+
+gaussImage = OriImage.filter(ImageFilter.MinFilter)
+gaussImage.show()
+
+# Save Gaussian Blur Image
+# gaussImage.save('images/gaussian_blur.jpg')
+

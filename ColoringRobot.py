@@ -9,7 +9,7 @@ import ttkbootstrap as ttk
 from tkinter import simpledialog
 import os
 from os.path import exists
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, Image
 from datetime import datetime
 
 mockJsonFile = {
@@ -712,6 +712,7 @@ class DotGUITab:
         # dropSelected_colorPalletPresets.set(getColorPresetNames()[0])
 
 
+# window of previous images
 class ImageViewWindow:
     def __init__(self):
 
@@ -723,7 +724,7 @@ class ImageViewWindow:
             if fileName.endswith(".png"):
                 onlyPNGFiles.append(fileName)
 
-        itemsInEachRow = 3
+        itemsInEachRow = 7
 
         self.icons = []
         for pngFileIndex in range(len(onlyPNGFiles)):
@@ -749,11 +750,31 @@ class ImageEditor:
         self.label_image.grid(row=0, column=0)
         self.label_image.image = image
 
+        # blur value
+        self.blurValue = ttk.Entry(master=self.frame_pictureEdit)
+        self.blurValue.grid(row=0, column=1)
+
+        # button reloads image
+        self.button_reloadImage = ttk.Button(master=self.frame_pictureEdit)
+        self.button_reloadImage.grid(row=1, column=0)
+
         # get the preset information using the fileName and the json file
 
     def showPhotoEditor(self):
         frame_photos.grid_forget()
         self.frame_pictureEdit.grid(row=0, column=0)
+
+    def reloadImage(self):
+        # Open existing image
+        OriImage = Image.open('images/boy.jpg')
+        OriImage.show()
+
+        # Applying GaussianBlur filter
+        gaussImage = OriImage.filter(ImageFilter.GaussianBlur(5))
+        gaussImage.show()
+
+        # Save Gaussian Blur Image
+        gaussImage.save('images/gaussian_blur.jpg')
 
 
 def hex_to_rgb(value):

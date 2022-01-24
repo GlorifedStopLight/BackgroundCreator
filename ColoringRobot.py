@@ -226,19 +226,31 @@ class DotMaker:
                 self.addY = -s
 
     def randomPointByPoint(self):
-        conditions = [True, True]
 
+        directions = []
+
+        # adding to x won't be bad
         if self.xDirection and self.cords[0] + self.addX < self.moveHere[0] or \
                 not self.xDirection and self.cords[0] + self.addX > self.moveHere[0]:
-            self.cords[0] += self.addX
-            conditions[0] = False
 
+            directions.append(0)
+
+        # adding to y won't be bad
         elif self.yDirection and self.cords[1] + self.addY < self.moveHere[1] or \
                 not self.yDirection and self.cords[1] + self.addY > self.moveHere[1]:
-            self.cords[1] += self.addY
-            conditions[1] = False
 
-        if all(conditions):
+            directions.append(1)
+
+        if directions != []:
+
+            myDirection = choice(directions)
+            if myDirection == 0:
+                self.cords[0] += self.addX
+
+            elif myDirection == 1:
+                self.cords[1] += self.addY
+
+        else:
 
             self.moveHere = [randint(0, width), randint(0, height)]
             self.xDirection = self.cords[0] < self.moveHere[0]

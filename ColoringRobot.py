@@ -168,6 +168,27 @@ class DotMaker:
             else:
                 self.addY = -s
 
+        elif self.moveType == "zig zag point by point":
+            self.changeCordsThread = self.zigZagPointByPoint
+            self.distanceBeforeTurnRange = (3, 15)
+            self.distanceBeforeTurn = randint(self.movesBeforeDirectionChangeRange[0],
+                                              self.movesBeforeDirectionChangeRange[1])
+            self.currentDistance = 0
+            self.currentAxisIsHorizontal = True
+            self.moveHere = [0, 0]
+            self.xDirection = self.cords[0] < self.moveHere[0]
+            self.yDirection = self.cords[1] < self.moveHere[1]
+
+            if self.xDirection:
+                self.addX = s
+            else:
+                self.addX = -s
+
+            if self.yDirection:
+                self.addY = s
+            else:
+                self.addY = -s
+
     def getDotCreationInfo(self):
         x = self.cords[0]
         y = self.cords[1]
@@ -274,12 +295,12 @@ class DotMaker:
             self.cords[0] += self.addX
             self.cords[1] = self.moveHere[1] + ((self.m[1] / self.m[0]) * (self.cords[0] - self.moveHere[0]))
             conditions[0] = False
-        """
+
         if self.yDirection and self.cords[1] + self.addY < self.moveHere[1] or \
                 not self.yDirection and self.cords[1] + self.addY > self.moveHere[1]:
             self.cords[1] += self.addY
             conditions[1] = False
-        """
+
         if all(conditions):
 
             self.moveHere = [randint(0, width), randint(0, height)]
@@ -323,6 +344,87 @@ class DotMaker:
 
         self.cords[0] = abs(abs(self.cords[0] + self.slope[0] - width) - width)
         self.cords[1] = abs(abs(self.cords[1] + self.slope[1] - height) - height)
+
+    def zigZagPointByPoint(self):
+        conditions = [True, True]
+
+        # going on the horizontal axis
+        if self.currentAxisIsHorizontal:
+
+            # check if we can move on the horizontal axis
+            if self.xDirection and self.cords[0] + self.addX < self.moveHere[0] or \
+                    not self.xDirection and self.cords[0] + self.addX > self.moveHere[0]:
+
+                # move on horizontal axis
+                self.cords[0] += self.addX
+                conditions[0] = False
+                self.currentDistance += 1
+
+            # can't move further on horizontal axis
+            else:
+
+                # toggle the axis
+                self.currentAxisIsHorizontal = not self.currentAxisIsHorizontal
+
+                # reset distance
+                self.currentDistance = 0
+
+                # get a new random distance before turn
+                self.distanceBeforeTurn = randint(self.movesBeforeDirectionChangeRange[0], self.movesBeforeDirectionChangeRange[1])
+
+        # going on the vertical axis
+        else:
+
+            # check if we can move on the vertical axis
+            if self.yDirection and self.cords[1] + self.addY < self.moveHere[1] or \
+                    not self.yDirection and self.cords[1] + self.addY > self.moveHere[1]:
+
+                # move on the vertical axis
+                self.cords[1] += self.addY
+                conditions[1] = False
+                self.currentDistance += 1
+
+            # can't move further on vertical axis
+            else:
+
+                # toggle the axis
+                self.currentAxisIsHorizontal = not self.currentAxisIsHorizontal
+
+                # reset distance
+                self.currentDistance = 0
+
+                # get a new random distance before turn
+                self.distanceBeforeTurn = randint(self.movesBeforeDirectionChangeRange[0],
+                                                  self.movesBeforeDirectionChangeRange[1])
+
+        # need to turn
+        if self.currentDistance >= self.distanceBeforeTurn:
+
+            # reset the distance
+            self.currentDistance = 0
+
+            # toggle the axis
+            self.currentAxisIsHorizontal = not self.currentAxisIsHorizontal
+
+            # get a new random distance before turn
+            self.distanceBeforeTurn = randint(self.movesBeforeDirectionChangeRange[0],
+                                              self.movesBeforeDirectionChangeRange[1])
+
+        if all(conditions):
+
+            self.moveHere = [randint(0, width), randint(0, height)]
+            self.xDirection = self.cords[0] < self.moveHere[0]
+            self.yDirection = self.cords[1] < self.moveHere[1]
+
+            if self.xDirection:
+                self.addX = s
+            else:
+                self.addX = -s
+
+            if self.yDirection:
+                self.addY = s
+            else:
+                self.addY = -s
 
     # doesn't return anything just calculates the next color
     def getNextColor(self):
@@ -1043,7 +1145,7 @@ for i in range(width + s):
 # pick a random seed
 randomSeed = randint(0, 1000000000)
 
-movementTypes = ["random", "bouncing line", "point by point", "direct point by point", "random point by point"]
+movementTypes = ["random", "bouncing line", "point by point", "direct point by point", "random point by point", "zig zag point by point"]
 
 dotsDict = {}
 

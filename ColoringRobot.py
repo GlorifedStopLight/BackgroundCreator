@@ -135,21 +135,23 @@ class DotMaker:
         elif self.moveType == "direct point by point":
             self.changeCordsThread = self.directPointByPoint
 
-            self.moveHere = [0, 0]
-            self.xDirection = self.cords[0] < self.moveHere[0]
-            self.yDirection = self.cords[1] < self.moveHere[1]
+            self.moveHere = [randint(0, width), randint(0, height)]
 
-            self.m = (self.cords[0] - self.moveHere[0]), (self.cords[1] - self.moveHere[1])
+            slopeList = [self.cords[1] - self.moveHere[1], self.cords[0] - self.moveHere[0]]
+            slope = slopeList[0] / slopeList[1]
 
-            if self.xDirection:
-                self.addX = -s * self.m[0] / self.m[1]
+            #
+            if abs(slope) > 1:
+
+                self.slopeList = [s, (1 / slope) * s]
             else:
-                self.addX = -s * self.m[0] / self.m[1]
+                self.slopeList = [slope * s, s]
 
-            if self.yDirection:
-                self.addY = s * self.m[1] / self.m[0]
-            else:
-                self.addY = s * self.m[1] / self.m[0]
+            # moving in negative direction on the x axis
+            if self.cords[0] > self.moveHere[0]:
+                self.slopeList[1] *= -1
+            if self.cords[1] > self.moveHere[1]:
+                self.slopeList[0] *= -1
 
         elif self.moveType == "random point by point":
             self.changeCordsThread = self.randomPointByPoint
@@ -288,36 +290,29 @@ class DotMaker:
                 self.addY = -s
 
     def directPointByPoint(self):
-        conditions = [True, True]
 
-        if self.xDirection and self.cords[0] + self.addX < self.moveHere[0] or \
-                not self.xDirection and self.cords[0] + self.addX > self.moveHere[0]:
-            self.cords[0] += self.addX
-            self.cords[1] = self.moveHere[1] + ((self.m[1] / self.m[0]) * (self.cords[0] - self.moveHere[0]))
-            conditions[0] = False
+        self.cords[0] += self.slopeList[1]
+        self.cords[1] += self.slopeList[0]
 
-        if self.yDirection and self.cords[1] + self.addY < self.moveHere[1] or \
-                not self.yDirection and self.cords[1] + self.addY > self.moveHere[1]:
-            self.cords[1] += self.addY
-            conditions[1] = False
-
-        if all(conditions):
+        if abs(self.cords[0] - self.moveHere[0]) < s or abs(self.cords[1] - self.moveHere[1]) < s:
 
             self.moveHere = [randint(0, width), randint(0, height)]
-            self.xDirection = self.cords[0] < self.moveHere[0]
-            self.yDirection = self.cords[1] < self.moveHere[1]
 
-            self.m = (self.cords[0] - self.moveHere[0]), (self.cords[1] - self.moveHere[1])
+            slopeList = [self.cords[1] - self.moveHere[1], self.cords[0] - self.moveHere[0]]
+            slope = abs(slopeList[0] / slopeList[1])
 
-            if self.xDirection:
-                self.addX = s * self.m[0] / self.m[1]
+            #
+            if slope > 1:
+
+                self.slopeList = [s, (1 / slope) * s]
             else:
-                self.addX = s * self.m[0] / self.m[1]
+                self.slopeList = [slope * s, s]
 
-            if self.yDirection:
-                self.addY = -s * self.m[1] / self.m[0]
-            else:
-                self.addY = -s * self.m[1] / self.m[0]
+            # moving in negative direction on the x axis
+            if self.cords[0] > self.moveHere[0]:
+                self.slopeList[1] *= -1
+            if self.cords[1] > self.moveHere[1]:
+                self.slopeList[0] *= -1
 
     def bouncingLineGen(self):
 
